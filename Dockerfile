@@ -61,6 +61,10 @@ ENV BUILDLOGS=/tmp/buildlogs
 RUN sudo apt-get clean \
     && sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+RUN git config --global --add safe.directory /ardupilot && \
+    git config --global --add safe.directory /ardupilot/modules/ChibiOS && \
+    git config --global --add safe.directory /ardupilot/modules/CrashDebug
+
 ENV CCACHE_MAXSIZE=1G
 ENTRYPOINT ["/ardupilot_entrypoint.sh"]
 CMD ["bash"]
