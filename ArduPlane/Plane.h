@@ -330,6 +330,10 @@ private:
     ModeThermal mode_thermal;
 #endif
 
+#if AP_QUICKTUNE_ENABLED
+    AP_Quicktune quicktune;
+#endif
+    
     // This is the state of the flight control system
     // There are multiple states defined such as MANUAL, FBW-A, AUTO
     Mode *control_mode = &mode_initializing;
@@ -875,6 +879,10 @@ private:
     static const TerrainLookupTable Terrain_lookup[];
 #endif
 
+#if AP_QUICKTUNE_ENABLED
+    void update_quicktune(void);
+#endif
+
     // Attitude.cpp
     void adjust_nav_pitch_throttle(void);
     void update_load_factor(void);
@@ -1159,7 +1167,7 @@ private:
     void servos_twin_engine_mix();
     void force_flare();
     void throttle_watt_limiter(int8_t &min_throttle, int8_t &max_throttle);
-    void throttle_slew_limit(SRV_Channel::Aux_servo_function_t func);
+    void throttle_slew_limit();
     bool suppress_throttle(void);
     void update_throttle_hover();
     void channel_function_mixer(SRV_Channel::Aux_servo_function_t func1_in, SRV_Channel::Aux_servo_function_t func2_in,
