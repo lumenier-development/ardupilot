@@ -107,6 +107,7 @@ COMMON_VEHICLE_DEPENDENT_LIBRARIES = [
     'AP_EFI',
     'AP_Hott_Telem',
     'AP_ESC_Telem',
+    'AP_Servo_Telem',
     'AP_Stats',
     'AP_GyroFFT',
     'AP_RCTelemetry',
@@ -128,6 +129,7 @@ COMMON_VEHICLE_DEPENDENT_LIBRARIES = [
     'AP_Beacon',
     'AP_Arming',
     'AP_RCMapper',
+    'AP_MultiHeap',
 ]
 
 def get_legacy_defines(sketch_name, bld):
