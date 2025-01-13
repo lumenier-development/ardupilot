@@ -92,7 +92,7 @@
  # include <AC_PrecLand/AC_PrecLand.h>
 #endif
 
-#include "GCS_Mavlink.h"
+#include "GCS_MAVLink_Plane.h"
 #include "GCS_Plane.h"
 #include "quadplane.h"
 #include <AP_Tuning/AP_Tuning_config.h>
@@ -115,7 +115,7 @@
 #include <AP_Scripting/AP_Scripting.h>
 #endif
 
-#include "RC_Channel.h"     // RC Channel Library
+#include "RC_Channel_Plane.h"     // RC Channel Library
 #include "Parameters.h"
 #if HAL_ADSB_ENABLED
 #include "avoidance_adsb.h"
@@ -172,7 +172,9 @@ public:
     friend class ModeTakeoff;
     friend class ModeThermal;
     friend class ModeLoiterAltQLand;
-
+#if MODE_AUTOLAND_ENABLED
+    friend class ModeAutoLand;
+#endif
 #if AP_EXTERNAL_CONTROL_ENABLED
     friend class AP_ExternalControl_Plane;
 #endif
@@ -326,6 +328,9 @@ private:
 #endif  // QAUTOTUNE_ENABLED
 #endif  // HAL_QUADPLANE_ENABLED
     ModeTakeoff mode_takeoff;
+#if MODE_AUTOLAND_ENABLED
+    ModeAutoLand mode_autoland;
+#endif
 #if HAL_SOARING_ENABLED
     ModeThermal mode_thermal;
 #endif
@@ -454,6 +459,13 @@ private:
         float throttle_lim_min;
         uint32_t throttle_max_timer_ms;
         uint32_t level_off_start_time_ms;
+        // Good candidate for keeping the initial time for TKOFF_THR_MAX_T.
+#if MODE_AUTOLAND_ENABLED
+       struct {
+            float heading; // deg
+            bool initialized;
+        } initial_direction;
+#endif
     } takeoff_state;
 
     // ground steering controller state
@@ -1060,7 +1072,7 @@ private:
     bool in_fence_recovery() const;
 #endif
 
-    // ArduPlane.cpp
+    // Plane.cpp
     void disarm_if_autoland_complete();
     bool trigger_land_abort(const float climb_to_alt_m);
     void get_osd_roll_pitch_rad(float &roll, float &pitch) const override;

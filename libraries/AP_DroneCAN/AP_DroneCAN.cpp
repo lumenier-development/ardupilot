@@ -1447,8 +1447,8 @@ void AP_DroneCAN::handle_actuator_status_Volz(const CanardRxTransfer& transfer, 
         .measured_position = ToDeg(msg.actual_position),
         .voltage = msg.voltage * 0.2,
         .current = msg.current * 0.025,
-        .duty_cycle = msg.motor_pwm * (100.0/255.0),
-        .motor_temperature_cdeg = (int16_t(msg.motor_temperature) - 50)) * 100,
+        .duty_cycle = uint8_t(msg.motor_pwm * (100.0/255.0)),
+        .motor_temperature_cdeg = int16_t((msg.motor_temperature - 50) * 100),
         .valid_types = AP_Servo_Telem::TelemetryData::Types::MEASURED_POSITION |
                        AP_Servo_Telem::TelemetryData::Types::VOLTAGE |
                        AP_Servo_Telem::TelemetryData::Types::CURRENT |
@@ -1953,6 +1953,24 @@ void AP_DroneCAN::logging(void)
         return;
     }
     const auto &s = *stats;
+
+// @LoggerMessage: CANS
+// @Description: CAN Bus Statistics
+// @Field: TimeUS: Time since system startup
+// @Field: I: driver index
+// @Field: T: transmit success count
+// @Field: Trq: transmit request count
+// @Field: Trej: transmit reject count
+// @Field: Tov: transmit overflow count
+// @Field: Tto: transmit timeout count
+// @Field: Tab: transmit abort count
+// @Field: R: receive count
+// @Field: Rov: receive overflow count
+// @Field: Rer: receive error count
+// @Field: Bo: bus offset error count
+// @Field: Etx: ESC successful send count
+// @Field: Stx: Servo successful send count
+// @Field: Ftx: ESC/Servo failed-to-send count
     AP::logger().WriteStreaming("CANS",
                                 "TimeUS,I,T,Trq,Trej,Tov,Tto,Tab,R,Rov,Rer,Bo,Etx,Stx,Ftx",
                                 "s#-------------",
