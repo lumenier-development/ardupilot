@@ -429,9 +429,9 @@ void GCS_MAVLINK::send_distance_sensor(const AP_RangeFinder_Backend *sensor, con
     mavlink_msg_distance_sensor_send(
         chan,
         AP_HAL::millis(),                        // time since system boot TODO: take time of measurement
-        sensor->min_distance_cm(),               // minimum distance the sensor can measure in centimeters
-        sensor->max_distance_cm(),               // maximum distance the sensor can measure in centimeters
-        sensor->distance_cm(),                   // current distance reading
+        MIN(sensor->min_distance() * 100, 65535),// minimum distance the sensor can measure in centimeters
+        MIN(sensor->max_distance() * 100, 65535),// maximum distance the sensor can measure in centimeters
+        MIN(sensor->distance() * 100, 65535),    // current distance reading
         sensor->get_mav_distance_sensor_type(),  // type from MAV_DISTANCE_SENSOR enum
         instance,                                // onboard ID of the sensor == instance
         sensor->orientation(),                   // direction the sensor faces from MAV_SENSOR_ORIENTATION enum
@@ -1070,9 +1070,6 @@ ap_message GCS_MAVLINK::mavlink_id_to_ap_message_id(const uint32_t mavlink_id) c
 #if AP_TERRAIN_AVAILABLE
         { MAVLINK_MSG_ID_TERRAIN_REQUEST,       MSG_TERRAIN_REQUEST},
         { MAVLINK_MSG_ID_TERRAIN_REPORT,        MSG_TERRAIN_REPORT},
-#endif
-#if AP_MAVLINK_BATTERY2_ENABLED
-        { MAVLINK_MSG_ID_BATTERY2,              MSG_BATTERY2},
 #endif
 #if AP_CAMERA_ENABLED
         { MAVLINK_MSG_ID_CAMERA_FEEDBACK,       MSG_CAMERA_FEEDBACK},
@@ -2789,24 +2786,6 @@ void GCS::setup_uarts()
     devo_telemetry.init();
 #endif
 }
-
-#if AP_BATTERY_ENABLED && AP_MAVLINK_BATTERY2_ENABLED
-// report battery2 state
-void GCS_MAVLINK::send_battery2()
-{
-    const AP_BattMonitor &battery = AP::battery();
-
-    if (battery.num_instances() > 1) {
-        float current;
-        if (battery.current_amps(current, 1)) {
-            current = constrain_float(current * 100,-INT16_MAX,INT16_MAX); // 10*mA
-        } else {
-            current = -1;
-        }
-        mavlink_msg_battery2_send(chan, battery.voltage(1)*1000, current);
-    }
-}
-#endif  // AP_BATTERY_ENABLED && AP_MAVLINK_BATTERY2_ENABLED
 
 /*
   handle a SET_MODE MAVLink message
@@ -6170,13 +6149,6 @@ bool GCS_MAVLINK::try_send_message(const enum ap_message id)
     case MSG_BATTERY_STATUS:
         send_battery_status();
         break;
-
-#if AP_MAVLINK_BATTERY2_ENABLED
-    case MSG_BATTERY2:
-        CHECK_PAYLOAD_SIZE(BATTERY2);
-        send_battery2();
-        break;
-#endif
 #endif // AP_BATTERY_ENABLED
 
 #if AP_AHRS_ENABLED
