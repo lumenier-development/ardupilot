@@ -2559,13 +2559,6 @@ class TestSuite(ABC):
     def get_sim_parameter_documentation_get_whitelist(self):
         # common parameters
         ret = set([
-            "SIM_ACC_TRIM_X",
-            "SIM_ACC_TRIM_Y",
-            "SIM_ACC_TRIM_Z",
-            "SIM_ARSPD2_OFS",
-            "SIM_ARSPD2_RND",
-            "SIM_ARSPD_OFS",
-            "SIM_ARSPD_RND",
             "SIM_FTOWESC_ENA",
             "SIM_FTOWESC_POW",
             "SIM_IE24_ENABLE",
@@ -3188,7 +3181,7 @@ class TestSuite(ABC):
                     # "name" was found in the XML, so was found in an
                     # @LoggerMessage markup line, but was *NOT* found
                     # in our bodgy parsing of the C++ code (in a
-                    # Log_Write call or in the static structures
+                    # Log_Write call or in the static structures)
                     raise NotAchievedException("documented field %s.%s not found in code" %
                                                (name, label))
         if len(missing) > 0:
