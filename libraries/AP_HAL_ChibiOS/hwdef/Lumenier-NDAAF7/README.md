@@ -349,10 +349,10 @@ The 4 auxiliary PWM outputs are in 1 group:
 
 ## Analog inputs
 
-The LUX F765 NDAA has 2 analog inputs
+The LUX F765 NDAA has 2 analog inputs:
 
- - PC3 -> Battery Voltage
  - PC2 -> Battery Current
+ - PC3 -> Battery Voltage
 
 ## Loading Firmware
 
