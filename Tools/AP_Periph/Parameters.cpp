@@ -355,7 +355,7 @@ const AP_Param::Info AP_Periph_FW::var_info[] = {
     GOBJECT(rangefinder, "RNGFND", RangeFinder),
 #endif
 
-#ifdef HAL_PERIPH_ENABLE_ADSB
+#if AP_PERIPH_ADSB_ENABLED
     // @Param: ADSB_BAUDRATE
     // @DisplayName: ADSB serial baudrate
     // @Description: ADSB serial baudrate.
@@ -392,7 +392,7 @@ const AP_Param::Info AP_Periph_FW::var_info[] = {
     GSCALAR(hardpoint_rate, "HARDPOINT_RATE", 100),
 #endif
 
-#if defined(HAL_PERIPH_ENABLE_HWESC) || defined(HAL_PERIPH_ENABLE_ESC_APD)
+#if AP_PERIPH_HOBBYWING_ESC_ENABLED || defined(HAL_PERIPH_ENABLE_ESC_APD)
     // @Param: ESC_NUMBER
     // @DisplayName: ESC number
     // @Description: This is the ESC number to report as in UAVCAN ESC telemetry feedback packets.
@@ -401,7 +401,7 @@ const AP_Param::Info AP_Periph_FW::var_info[] = {
     GARRAY(esc_number, 0, "ESC_NUMBER", 0),
 #endif
 
-#ifdef HAL_PERIPH_ENABLE_RC_OUT
+#if AP_PERIPH_RC_OUT_ENABLED
     // Servo driver
     // @Group: OUT
     // @Path: ../libraries/SRV_Channel/SRV_Channels.cpp
@@ -461,7 +461,7 @@ const AP_Param::Info AP_Periph_FW::var_info[] = {
     GOBJECT(temperature_sensor,         "TEMP",     AP_TemperatureSensor),
 #endif
 
-#ifdef HAL_PERIPH_ENABLE_MSP
+#if AP_PERIPH_MSP_ENABLED
     // @Param: MSP_PORT
     // @DisplayName: MSP Serial Port
     // @Description: This is the serial port number where SERIALx_PROTOCOL will be set to MSP
@@ -472,7 +472,7 @@ const AP_Param::Info AP_Periph_FW::var_info[] = {
     GSCALAR(msp_port, "MSP_PORT", AP_PERIPH_MSP_PORT_DEFAULT),
 #endif
     
-#ifdef HAL_PERIPH_ENABLE_NOTIFY
+#if AP_PERIPH_NOTIFY_ENABLED
     // @Group: NTF_
     // @Path: ../libraries/AP_Notify/AP_Notify.cpp
     GOBJECT(notify, "NTF_",  AP_Notify),
@@ -518,7 +518,7 @@ const AP_Param::Info AP_Periph_FW::var_info[] = {
     GOBJECT(node_stats, "STAT", AP_Stats),
 #endif
 
-#ifdef HAL_PERIPH_ENABLE_EFI
+#if AP_PERIPH_EFI_ENABLED
     // @Param: EFI_BAUDRATE
     // @DisplayName: EFI serial baudrate
     // @Description: EFI  serial baudrate.
@@ -677,7 +677,7 @@ const AP_Param::Info AP_Periph_FW::var_info[] = {
     GOBJECT(rtc,                   "RTC",    AP_RTC),
 #endif
 
-#ifdef HAL_PERIPH_ENABLE_RELAY
+#if AP_PERIPH_RELAY_ENABLED
     // @Group: RELAY
     // @Path: ../libraries/AP_Relay/AP_Relay.cpp
     GOBJECT(relay,                 "RELAY", AP_Relay),
