@@ -26,7 +26,7 @@ The Lumenier LUX F765 NDAA flight controller is sold by
  - 10V Regulator for VTX Power
  - 5V Regulator for Accessories
  - Supported Firmware - Betaflight, Ardupilot, and PX4
- - NDAA compliant and designed in the USA
+ - NDAA compliant
  - Power Supply: 3S to 6S Battery Voltage
 
 ## Pinout
@@ -357,7 +357,7 @@ The LUX F765 NDAA has 2 analog inputs:
 ## Loading Firmware
 
 The board comes pre-installed with Betaflight firmware when purchased from GetFPV. 
-The board can easily be transitioned from Betaflight to Ardupilot in a matter of minutes. 
+The board can be easily transitioned from Betaflight to Ardupilot in a matter of minutes. 
 Please see the [product page](https://www.getfpv.com/lumenier-lux-f765-flight-controller-ndaa.html)
 for firmware binaries and instructions on how to transition from Betaflight to Ardupilot.
 
