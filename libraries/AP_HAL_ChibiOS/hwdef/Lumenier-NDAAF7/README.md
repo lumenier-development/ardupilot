@@ -111,22 +111,22 @@ All connectors are JST SH 1.0mm pitch EXCEPT for the CANbus port, which is JST G
    </tr>
    <tr>
    <td>5</td>
-   <td>MOTOR 1</td>
+   <td>MOTOR 1 (TIM2_CH1)</td>
    <td>+3.3V</td>
    </tr>
    <tr>
    <td>6</td>
-   <td>MOTOR 2</td>
+   <td>MOTOR 2 (TIM2_CH2)</td>
    <td>+3.3V</td>
    </tr>
    <tr>
    <td>7</td>
-   <td>MOTOR 3</td>
+   <td>MOTOR 3 (TIM2_CH3)</td>
    <td>+3.3V</td>
    </tr>
    <tr>
    <td>8</td>
-   <td>MOTOR 4</td>
+   <td>MOTOR 4 (TIM2_CH4)</td>
    <td>+3.3V</td>
    </tr>
    </tbody>
@@ -163,22 +163,22 @@ All connectors are JST SH 1.0mm pitch EXCEPT for the CANbus port, which is JST G
    </tr>
    <tr>
    <td>5</td>
-   <td>MOTOR 5</td>
+   <td>MOTOR 5 (TIM4_CH1)</td>
    <td>+3.3V</td>
    </tr>
    <tr>
    <td>6</td>
-   <td>MOTOR 6</td>
+   <td>MOTOR 6 (TIM4_CH2)</td>
    <td>+3.3V</td>
    </tr>
    <tr>
    <td>7</td>
-   <td>MOTOR 7</td>
+   <td>MOTOR 7 (TIM4_CH3)</td>
    <td>+3.3V</td>
    </tr>
    <tr>
    <td>8</td>
-   <td>MOTOR 8</td>
+   <td>MOTOR 8 (TIM4_CH4)</td>
    <td>+3.3V</td>
    </tr>
    </tbody>
