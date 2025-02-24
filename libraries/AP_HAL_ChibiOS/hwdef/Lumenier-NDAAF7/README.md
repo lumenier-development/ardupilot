@@ -3,6 +3,8 @@
 The Lumenier LUX F765 NDAA flight controller is sold by 
 [GetFPV](https://www.getfpv.com/lumenier-lux-f765-flight-controller-ndaa.html).
 
+![LUX F765 NDAA Slim](LUXF765_NDAA_Slim_Graphic.png "LUX F765 NDAA Slim")
+
 ## Features
 
  - Processor: MCU STM32F765, 216MHz, 512KB RAM, 2MB Flash
@@ -42,9 +44,9 @@ The Lumenier LUX F765 NDAA flight controller is sold by
  - SERIAL5 -> USART2 (ESC Telemetry)
  - SERIAL6 -> UART4  (Spare)
  - SERIAL7 -> UART7  (Spare)
- - SERIAL9 -> USART6 (Spare)
+ - SERIAL8 -> USART6 (Spare)
 
-Serial1 is DMA capable and can be used for CRSF.
+Serial1 (USART1) is DMA capable and can be used for CRSF.
 
 ## SPI Mapping
 
