@@ -1,4 +1,4 @@
-name: Macos Build
+name: Lumenier Build
 
 on:
   push:
