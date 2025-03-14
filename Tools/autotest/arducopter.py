@@ -4,7 +4,6 @@ Fly Copter in SITL
 AP_FLAKE8_CLEAN
 '''
 
-from __future__ import print_function
 import copy
 import math
 import os
@@ -5064,6 +5063,27 @@ class AutoTestCopter(vehicle_test_suite.TestSuite):
         self.reboot_sitl()
         self.progress("All done")
 
+    def PayloadPlaceMissionOpenGripper(self):
+        '''test running the mission when the gripper is open'''
+        self.set_analog_rangefinder_parameters()
+        self.set_servo_gripper_parameters()
+        self.reboot_sitl()
+
+        self.load_mission("copter_payload_place.txt")
+
+        self.set_parameter("AUTO_OPTIONS", 3)
+        self.change_mode('AUTO')
+        self.wait_ready_to_arm()
+
+        self.arm_vehicle()
+
+        self.progress("Opening the gripper before time")
+        self.run_auxfunc(19, 0)
+
+        self.wait_text("Abort: Gripper Open", timeout=90)
+
+        self.wait_disarmed()
+
     def Weathervane(self):
         '''Test copter weathervaning'''
         # We test nose into wind code paths and yaw direction here and test side into wind
@@ -8924,8 +8944,15 @@ class AutoTestCopter(vehicle_test_suite.TestSuite):
         self.fly_rangefinder_mavlink()
         self.fly_rangefinder_sitl()  # i.e. type 100
 
+        class I2CDriverToTest:
+            def __init__(self, name, rngfnd_type, rngfnd_addr=None):
+                self.name = name
+                self.rngfnd_type = rngfnd_type
+                self.rngfnd_addr = rngfnd_addr
+
         i2c_drivers = [
-            ("maxbotixi2cxl", 2),
+            I2CDriverToTest("maxbotixi2cxl", 2),
+            I2CDriverToTest("terarangeri2c", 14, rngfnd_addr=0x31),
         ]
         while len(i2c_drivers):
             do_drivers = i2c_drivers[0:9]
@@ -8933,14 +8960,15 @@ class AutoTestCopter(vehicle_test_suite.TestSuite):
             count = 1
             p = {}
             for d in do_drivers:
-                (sim_name, rngfnd_param_value) = d
-                p["RNGFND%u_TYPE" % count] = rngfnd_param_value
+                p[f"RNGFND{count}_TYPE"] = d.rngfnd_type
+                if d.rngfnd_addr is not None:
+                    p[f"RNGFND{count}_ADDR"] = d.rngfnd_addr
                 count += 1
 
             self.set_parameters(p)
 
             self.reboot_sitl()
-            self.fly_rangefinder_drivers_fly([x[0] for x in do_drivers])
+            self.fly_rangefinder_drivers_fly([x.name for x in do_drivers])
 
     def RangeFinderDriversMaxAlt(self):
         '''test max-height behaviour'''
@@ -11023,6 +11051,7 @@ class AutoTestCopter(vehicle_test_suite.TestSuite):
              self.MAV_CMD_CONDITION_YAW,
              self.LoiterToAlt,
              self.PayloadPlaceMission,
+             self.PayloadPlaceMissionOpenGripper,
              self.PrecisionLoiterCompanion,
              self.Landing,
              self.PrecisionLanding,
@@ -12727,8 +12756,9 @@ class AutoTestCopter(vehicle_test_suite.TestSuite):
                     trim_x = self.get_parameter('AHRS_TRIM_X', verbose=False)
                     trim_y = self.get_parameter('AHRS_TRIM_Y', verbose=False)
                     self.progress(f"trim_x={trim_x} trim_y={trim_y}")
-                    if abs(trim_x) < 0.02 and abs(trim_y) < 0.02:
+                    if abs(trim_x) < 0.01 and abs(trim_y) < 0.01:
                         self.progress("Good AHRS trims")
+                        self.progress(f"vx={lpn.vx} vy={lpn.vy}")
                         if abs(lpn.vx) > 1 or abs(lpn.vy) > 1:
                             raise NotAchievedException("Velocity after trimming?!")
                         break
@@ -12806,6 +12836,28 @@ class AutoTestCopter(vehicle_test_suite.TestSuite):
         self.context_pop()
         self.change_mode('LOITER')
         self.do_RTL()
+
+    def MISSION_OPTION_CLEAR_MISSION_AT_BOOT(self):
+        '''check functionality of mission-clear-at-boot option'''
+        self.upload_simple_relhome_mission([
+            (mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 0, 20),
+            (mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 20, 0, 20),
+            (mavutil.mavlink.MAV_CMD_NAV_RETURN_TO_LAUNCH, 0, 0, 0),
+        ])
+        if len(self.download_using_mission_protocol(mavutil.mavlink.MAV_MISSION_TYPE_MISSION)) != 4:
+            raise NotAchievedException("No mission after upload?!")
+
+        self.reboot_sitl()
+        if len(self.download_using_mission_protocol(mavutil.mavlink.MAV_MISSION_TYPE_MISSION)) != 4:
+            raise NotAchievedException("No mission after reboot?!")
+
+        self.set_parameters({
+            "MIS_OPTIONS": 1,
+        })
+        self.reboot_sitl()
+
+        if len(self.download_using_mission_protocol(mavutil.mavlink.MAV_MISSION_TYPE_MISSION)) != 0:
+            raise NotAchievedException("Mission did not clear after reboot with option set")
 
     def do_land(self):
         self.change_mode('LAND')
@@ -12892,6 +12944,7 @@ class AutoTestCopter(vehicle_test_suite.TestSuite):
             self.ArmSwitchAfterReboot,
             self.RPLidarA1,
             self.RPLidarA2,
+            self.MISSION_OPTION_CLEAR_MISSION_AT_BOOT,
             self.SafetySwitch,
             self.BrakeZ,
             self.MAV_CMD_DO_FLIGHTTERMINATION,

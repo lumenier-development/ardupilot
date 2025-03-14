@@ -7,7 +7,6 @@ Parameters are in-code defaults plus default_params/sub.parm
 AP_FLAKE8_CLEAN
 '''
 
-from __future__ import print_function
 import os
 import sys
 
@@ -1047,6 +1046,31 @@ class AutoTestSub(vehicle_test_suite.TestSuite):
 
         self.disarm_vehicle()
 
+    def SHT3X(self):
+        '''test for the SHT3X temperature/hygro driver'''
+        self.set_parameters({
+            'TEMP1_TYPE': 8,
+            'TEMP1_ADDR': 0x44,
+            'TEMP_LOG': 1,
+        })
+        self.reboot_sitl()
+        self.context_push()
+        self.set_parameter('LOG_DISARMED', 1)
+        self.delay_sim_time(10)
+        self.context_pop()
+
+        dfreader = self.dfreader_for_current_onboard_log()
+        while True:
+            m = dfreader.recv_match(type='TEMP')
+            if m is None:
+                break
+            self.progress(m)
+            if m.Temp > 15 or m.Temp < 30:
+                # success!
+                break
+        if m is None:
+            raise NotAchievedException("Did not get good TEMP message")
+
     def tests(self):
         '''return list of all tests'''
         ret = super(AutoTestSub, self).tests()
@@ -1080,6 +1104,7 @@ class AutoTestSub(vehicle_test_suite.TestSuite):
             self.FuseMag,
             self.INA3221,
             self.PosHoldBounceBack,
+            self.SHT3X,
         ])
 
         return ret

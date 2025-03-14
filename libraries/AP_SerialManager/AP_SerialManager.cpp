@@ -585,7 +585,9 @@ void AP_SerialManager::init()
                                          AP_SERIALMANAGER_PPP_BUFSIZE_TX);
                     break;
 #endif
-                    
+                case SerialProtocol_IOMCU:
+                    // nothing to do, AP_IOMCU handles this
+                    break;
                 default:
                     uart->begin(state[i].baudrate());
             }
@@ -864,6 +866,25 @@ void AP_SerialManager::register_port(RegisteredPort *port)
         }
     }
 }
+
+#if HAL_LOGGING_ENABLED && HAL_UART_STATS_ENABLED
+// Log UART message for each registered serial port
+void AP_SerialManager::registered_ports_log()
+{
+    // Calculate time since last call
+    const uint32_t now_ms = AP_HAL::millis();
+    const uint32_t dt_ms = now_ms - registered_ports_last_log_ms;
+    registered_ports_last_log_ms = now_ms;
+
+    WITH_SEMAPHORE(port_sem);
+
+    // Loop over ports
+    for (auto p = registered_ports; p; p = p->next) {
+        p->log_stats(p->state.idx, p->state.stats, dt_ms);
+    }
+}
+#endif
+
 #endif // AP_SERIALMANAGER_REGISTER_ENABLED
 
 namespace AP {
