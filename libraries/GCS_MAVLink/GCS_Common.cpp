@@ -493,7 +493,7 @@ void GCS_MAVLINK::send_distance_sensor()
 #endif
 }
 
-#if AP_RANGEFINDER_ENABLED
+#if AP_MAVLINK_MSG_RANGEFINDER_SENDING_ENABLED
 void GCS_MAVLINK::send_rangefinder() const
 {
     RangeFinder *rangefinder = RangeFinder::get_singleton();
@@ -509,7 +509,7 @@ void GCS_MAVLINK::send_rangefinder() const
             s->distance(),
             s->voltage_mv() * 0.001f);
 }
-#endif
+#endif  // AP_MAVLINK_MSG_RANGEFINDER_SENDING_ENABLED
 
 #if HAL_PROXIMITY_ENABLED
 void GCS_MAVLINK::send_proximity()
@@ -1065,9 +1065,9 @@ ap_message GCS_MAVLINK::mavlink_id_to_ap_message_id(const uint32_t mavlink_id) c
 #endif
         { MAVLINK_MSG_ID_HWSTATUS,              MSG_HWSTATUS},
         { MAVLINK_MSG_ID_WIND,                  MSG_WIND},
-#if AP_RANGEFINDER_ENABLED
+#if AP_MAVLINK_MSG_RANGEFINDER_SENDING_ENABLED
         { MAVLINK_MSG_ID_RANGEFINDER,           MSG_RANGEFINDER},
-#endif
+#endif  // AP_MAVLINK_MSG_RANGEFINDER_SENDING_ENABLED
         { MAVLINK_MSG_ID_DISTANCE_SENSOR,       MSG_DISTANCE_SENSOR},
 #if AP_TERRAIN_AVAILABLE
         { MAVLINK_MSG_ID_TERRAIN_REQUEST,       MSG_TERRAIN_REQUEST},
@@ -3515,7 +3515,9 @@ MAV_RESULT GCS_MAVLINK::handle_preflight_reboot(const mavlink_command_int_t &pac
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
+#if !defined(__clang__)  // avoid -Wunknown-warning-option
 #pragma GCC diagnostic ignored "-Wstringop-overflow"
+#endif
             *foo = 0xab;
 #pragma GCC diagnostic pop
 
@@ -3533,7 +3535,9 @@ MAV_RESULT GCS_MAVLINK::handle_preflight_reboot(const mavlink_command_int_t &pac
             // String is kept short for space reasons.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
+#if !defined(__clang__)  // avoid -Wunknown-warning-option
 #pragma GCC diagnostic ignored "-Wstringop-overflow"
+#endif
             send_text(MAV_SEVERITY_INFO, "x: %u", (unsigned)*foo);
 #pragma GCSS diagnostic pop
 
@@ -6364,12 +6368,12 @@ bool GCS_MAVLINK::try_send_message(const enum ap_message id)
         break;
 #endif
 
-#if AP_RANGEFINDER_ENABLED
+#if AP_MAVLINK_MSG_RANGEFINDER_SENDING_ENABLED
     case MSG_RANGEFINDER:
         CHECK_PAYLOAD_SIZE(RANGEFINDER);
         send_rangefinder();
         break;
-#endif
+#endif  // AP_MAVLINK_MSG_RANGEFINDER_SENDING_ENABLED
 
     case MSG_DISTANCE_SENSOR:
         send_distance_sensor();
