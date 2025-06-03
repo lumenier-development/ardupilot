@@ -6,7 +6,6 @@
 #include <AP_Math/SCurve.h>
 #include <AP_Math/SplineCurve.h>
 #include <AP_Common/Location.h>
-#include <AP_InertialNav/AP_InertialNav.h>     // Inertial Navigation library
 #include <AC_AttitudeControl/AC_PosControl.h>      // Position control library
 #include <AC_AttitudeControl/AC_AttitudeControl.h> // Attitude control library
 #include <AP_Terrain/AP_Terrain.h>
@@ -20,7 +19,7 @@ class AC_WPNav
 public:
 
     /// Constructor
-    AC_WPNav(const AP_InertialNav& inav, const AP_AHRS_View& ahrs, AC_PosControl& pos_control, const AC_AttitudeControl& attitude_control);
+    AC_WPNav(const AP_AHRS_View& ahrs, AC_PosControl& pos_control, const AC_AttitudeControl& attitude_control);
 
     /// provide rangefinder based terrain offset
     /// terrain offset is the terrain's height above the EKF origin
@@ -236,7 +235,6 @@ protected:
     void calc_scurve_jerk_and_snap();
 
     // references and pointers to external libraries
-    const AP_InertialNav&   _inav;
     const AP_AHRS_View&     _ahrs;
     AC_PosControl&          _pos_control;
     const AC_AttitudeControl& _attitude_control;

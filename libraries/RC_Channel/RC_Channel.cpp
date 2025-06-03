@@ -116,7 +116,7 @@ const AP_Param::GroupInfo RC_Channel::var_info[] = {
     // @Values{Copter}: 5:Save Trim
     // @Values{Rover}: 5:Save Trim (4.1 and lower)
     // @Values{Copter, Rover}: 7:Save WP
-    // @Values{Copter, Rover, Plane}: 9:Camera Trigger
+    // @Values{Copter, Rover, Plane, Sub}: 9:Camera Trigger
     // @Values{Copter}: 10:RangeFinder Enable
     // @Values{Copter, Rover, Plane, Sub}: 11:Fence Enable
     // @Values{Copter}: 13:Super Simple Mode
@@ -164,10 +164,10 @@ const AP_Param::GroupInfo RC_Channel::var_info[] = {
     // @Values{Rover}: 59:Simple Mode
     // @Values{Copter}: 60:ZigZag Mode
     // @Values{Copter}: 61:ZigZag SaveWP
-    // @Values{Copter, Rover, Plane}: 62:Compass Learn
+    // @Values{Copter, Rover, Plane, Sub}: 62:Compass Learn
     // @Values{Rover}: 63:Sailboat Tack
     // @Values{Plane}: 64:Reverse Throttle
-    // @Values{Copter, Rover, Plane, Blimp}: 65:GPS Disable
+    // @Values{Copter, Rover, Plane, Blimp, Sub}: 65:GPS Disable
     // @Values{Copter, Rover, Plane, Sub}: 66:Relay5 On/Off, 67:Relay6 On/Off
     // @Values{Copter}: 68:STABILIZE Mode
     // @Values{Copter}: 69:POSHOLD Mode
@@ -205,7 +205,7 @@ const AP_Param::GroupInfo RC_Channel::var_info[] = {
     // @Values{Copter, Rover, Plane, Sub}: 102:Camera Mode Toggle
     // @Values{Copter, Rover, Plane, Blimp, Sub, Tracker}: 103: EKF lane switch attempt
     // @Values{Copter, Rover, Plane, Blimp, Sub, Tracker}: 104: EKF yaw reset
-    // @Values{Copter, Rover, Plane}: 105:GPS Disable Yaw
+    // @Values{Copter, Rover, Plane, Sub}: 105:GPS Disable Yaw
     // @Values{Rover, Plane}: 106:Disable Airspeed Use
     // @Values{Plane}: 107:Enable FW Autotune
     // @Values{Plane}: 108:QRTL Mode
@@ -733,6 +733,7 @@ void RC_Channel::init_aux_function(const AUX_FUNC ch_option, const AuxSwitchPos 
 #endif
         break;
 
+    // these functions require explicit initialization
 #if HAL_ADSB_ENABLED
     case AUX_FUNC::AVOID_ADSB:
 #endif
@@ -786,11 +787,11 @@ void RC_Channel::init_aux_function(const AUX_FUNC ch_option, const AuxSwitchPos 
 #endif
 #if AP_AHRS_ENABLED
     case AUX_FUNC::AHRS_TYPE:
+#endif
         run_aux_function(ch_option, ch_flag, AuxFuncTrigger::Source::INIT, ch_in);
         break;
-#endif
     default:
-        GCS_SEND_TEXT(MAV_SEVERITY_WARNING, "Failed to init: RC%u_OPTION: %u\n",
+        GCS_SEND_TEXT(MAV_SEVERITY_WARNING, "Failed to init: RC%u_OPTION: %u",
                         (unsigned)(this->ch_in+1), (unsigned)ch_option);
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
         AP_BoardConfig::config_error("Failed to init: RC%u_OPTION: %u",
@@ -1598,7 +1599,7 @@ bool RC_Channel::do_aux_function(const AuxFuncTrigger &trigger)
 #if AP_GPS_ENABLED
     case AUX_FUNC::GPS_DISABLE:
         AP::gps().force_disable(ch_flag == AuxSwitchPos::HIGH);
-#if HAL_EXTERNAL_AHRS_ENABLED
+#if AP_EXTERNAL_AHRS_ENABLED
         AP::externalAHRS().set_gnss_disable(ch_flag == AuxSwitchPos::HIGH);
 #endif
         break;
@@ -1854,7 +1855,7 @@ bool RC_Channel::do_aux_function(const AuxFuncTrigger &trigger)
         break;
 
     case AUX_FUNC::AHRS_TYPE: {
-#if HAL_NAVEKF3_AVAILABLE && HAL_EXTERNAL_AHRS_ENABLED
+#if HAL_NAVEKF3_AVAILABLE && AP_EXTERNAL_AHRS_ENABLED
         AP::ahrs().set_ekf_type(ch_flag==AuxSwitchPos::HIGH? AP_AHRS::EKFType::EXTERNAL : AP_AHRS::EKFType::THREE);
 #endif
         break;

@@ -378,7 +378,7 @@ void ModeAuto::takeoff_start(const Location& dest_loc)
     // by default current_alt_cm and alt_target_cm are alt-above-EKF-origin
     int32_t alt_target_cm;
     bool alt_target_terrain = false;
-    float current_alt_cm = inertial_nav.get_position_z_up_cm();
+    float current_alt_cm = pos_control->get_pos_estimate_NEU_cm().z;
     float terrain_offset;   // terrain's altitude in cm above the ekf origin
     if ((dest_loc.get_alt_frame() == Location::AltFrame::ABOVE_TERRAIN) && wp_nav->get_terrain_offset_cm(terrain_offset)) {
         // subtract terrain offset to convert vehicle's alt-above-ekf-origin to alt-above-terrain
@@ -535,7 +535,7 @@ void ModeAuto::circle_movetoedge_start(const Location &circle_center, float radi
         }
 
         // if we are outside the circle, point at the edge, otherwise hold yaw
-        const float dist_to_center = get_horizontal_distance_cm(inertial_nav.get_position_xy_cm().topostype(), copter.circle_nav->get_center_NEU_cm().xy());
+        const float dist_to_center = get_horizontal_distance_cm(pos_control->get_pos_estimate_NEU_cm().xy().tofloat(), copter.circle_nav->get_center_NEU_cm().xy().tofloat());
         // initialise yaw
         // To-Do: reset the yaw only when the previous navigation command is not a WP.  this would allow removing the special check for ROI
         if (auto_yaw.mode() != AutoYaw::Mode::ROI) {
@@ -2357,6 +2357,44 @@ bool ModeAuto::resume()
 bool ModeAuto::paused() const
 {
     return (wp_nav != nullptr) && wp_nav->paused();
+}
+
+/*
+  get a height above ground estimate for landing
+ */
+int32_t ModeAuto::get_alt_above_ground_cm()
+{
+    // Only override if in landing submode
+    if (_mode == SubMode::LAND) {
+        // Rangefinder takes priority
+        int32_t alt_above_ground_cm;
+        if (copter.get_rangefinder_height_interpolated_cm(alt_above_ground_cm)) {
+            return alt_above_ground_cm;
+        }
+
+        // Take land altitude from command
+        const AP_Mission::Mission_Command& cmd = mission.get_current_nav_cmd();
+        switch (cmd.id) {
+        case MAV_CMD_NAV_VTOL_LAND:
+        case MAV_CMD_NAV_LAND: {
+            if (cmd.content.location.lat != 0 || cmd.content.location.lng != 0) {
+                // If land location is valid return height above it
+                ftype dist;
+                if (copter.current_loc.get_height_above(cmd.content.location, dist)) {
+                    return dist * 100.0;
+                }
+            }
+            break;
+        }
+
+        default:
+            // Really should not end up here as were in SubMode land
+            break;
+        }
+    }
+
+    // Use default method
+    return Mode::get_alt_above_ground_cm();
 }
 
 #endif
