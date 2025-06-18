@@ -907,7 +907,7 @@ void QuadPlane::multicopter_attitude_rate_update(float yaw_rate_cds)
 
             if (!(tailsitter.input_type & Tailsitter::input::TAILSITTER_INPUT_PLANE)) {
                 // In multicopter input mode, the roll and yaw stick axes are independent of pitch
-                attitude_control->input_euler_rate_yaw_euler_angle_pitch_bf_roll(false,
+                attitude_control->input_euler_rate_yaw_euler_angle_pitch_bf_roll_cd(false,
                                                                                 plane.nav_roll_cd,
                                                                                 plane.nav_pitch_cd,
                                                                                 yaw_rate_cds);
@@ -937,7 +937,7 @@ void QuadPlane::multicopter_attitude_rate_update(float yaw_rate_cds)
                 float p_yaw_rate = plane.nav_roll_cd / y2r_scale;
                 float p_roll_angle = -y2r_scale * yaw_rate_cds;
 
-                attitude_control->input_euler_rate_yaw_euler_angle_pitch_bf_roll(true,
+                attitude_control->input_euler_rate_yaw_euler_angle_pitch_bf_roll_cd(true,
                                                                                 p_roll_angle,
                                                                                 plane.nav_pitch_cd,
                                                                                 p_yaw_rate);
@@ -2586,7 +2586,7 @@ void QuadPlane::vtol_position_controller(void)
             target_speed_xy_cms = diff_wp_norm * target_speed * 100;
             target_accel_cms = diff_wp_norm * (-target_accel*100);
             target_yaw_deg = degrees(diff_wp_norm.angle());
-            const float yaw_err_deg = wrap_180(target_yaw_deg - degrees(plane.ahrs.get_yaw()));
+            const float yaw_err_deg = wrap_180(target_yaw_deg - degrees(plane.ahrs.get_yaw_rad()));
             bool overshoot = (closing_groundspeed < 0 || fabsf(yaw_err_deg) > 60);
             if (overshoot && !poscontrol.overshoot) {
                 gcs().send_text(MAV_SEVERITY_INFO,"VTOL Overshoot d=%.1f cs=%.1f yerr=%.1f",
@@ -3045,7 +3045,7 @@ void QuadPlane::assign_tilt_to_fwd_thr(void)
 */
 float QuadPlane::get_scaled_wp_speed(float target_bearing_deg) const
 {
-    const float yaw_difference = fabsf(wrap_180(degrees(plane.ahrs.get_yaw()) - target_bearing_deg));
+    const float yaw_difference = fabsf(wrap_180(degrees(plane.ahrs.get_yaw_rad()) - target_bearing_deg));
     const float wp_speed = wp_nav->get_default_speed_NE_cms() * 0.01;
     if (yaw_difference > 20) {
         // this gives a factor of 2x reduction in max speed when

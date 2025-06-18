@@ -702,6 +702,12 @@ const AP_Param::Info Sub::var_info[] = {
     GOBJECT(optflow,   "FLOW", AP_OpticalFlow),
 #endif
 
+#if OSD_ENABLED || OSD_PARAM_ENABLED
+    // @Group: OSD
+    // @Path: ../libraries/AP_OSD/AP_OSD.cpp
+    GOBJECT(osd, "OSD", AP_OSD),
+#endif
+
 #if AP_RPM_ENABLED
     // @Group: RPM
     // @Path: ../libraries/AP_RPM/AP_RPM.cpp
@@ -788,6 +794,10 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @User: Standard
     // @Range: -100 100
     AP_GROUPINFO("SFC_NOBARO_THST", 22, ParametersG2, surface_nobaro_thrust, 10),
+
+    // @Group: ACTUATOR
+    // @Path: ../ArduSub/actuators.cpp
+    AP_SUBGROUPINFO(actuators, "ACTUATOR", 23, ParametersG2, Actuators),
 
     AP_GROUPEND
 };

@@ -389,7 +389,7 @@ void ModeGuided::guided_set_angle(const Quaternion &q, float climb_rate_cms)
 // helper function to set yaw state and targets
 void ModeGuided::guided_set_yaw_state(bool use_yaw, float yaw_cd, bool use_yaw_rate, float yaw_rate_cds, bool relative_angle)
 {    
-    float current_yaw = wrap_2PI(AP::ahrs().get_yaw());
+    float current_yaw = wrap_2PI(AP::ahrs().get_yaw_rad());
     float euler_yaw_angle;
     float yaw_error;
 
@@ -507,7 +507,7 @@ void ModeGuided::guided_pos_control_run()
     } else if (sub.auto_yaw_mode == AUTO_YAW_LOOK_AT_HEADING) {
         // roll, pitch from pilot, yaw & yaw_rate from auto_control
         target_yaw_rate = sub.yaw_look_at_heading_slew * 100.0;
-        attitude_control->input_euler_angle_roll_pitch_slew_yaw(channel_roll->get_control_in(), channel_pitch->get_control_in(), get_auto_heading(), target_yaw_rate);
+        attitude_control->input_euler_angle_roll_pitch_slew_yaw_cd(channel_roll->get_control_in(), channel_pitch->get_control_in(), get_auto_heading(), target_yaw_rate);
     } else if (sub.auto_yaw_mode == AUTO_YAW_RATE) {
         // roll, pitch from pilot, yaw_rate from auto_control
         target_yaw_rate = sub.yaw_look_at_heading_slew * 100.0;
@@ -580,7 +580,7 @@ void ModeGuided::guided_vel_control_run()
     } else if (sub.auto_yaw_mode == AUTO_YAW_LOOK_AT_HEADING) {
         // roll, pitch from pilot, yaw & yaw_rate from auto_control
         target_yaw_rate = sub.yaw_look_at_heading_slew * 100.0;
-        attitude_control->input_euler_angle_roll_pitch_slew_yaw(channel_roll->get_control_in(), channel_pitch->get_control_in(), get_auto_heading(), target_yaw_rate);
+        attitude_control->input_euler_angle_roll_pitch_slew_yaw_cd(channel_roll->get_control_in(), channel_pitch->get_control_in(), get_auto_heading(), target_yaw_rate);
     } else if (sub.auto_yaw_mode == AUTO_YAW_RATE) {
         // roll, pitch from pilot, yaw_rate from auto_control
         target_yaw_rate = sub.yaw_look_at_heading_slew * 100.0;
@@ -660,7 +660,7 @@ void ModeGuided::guided_posvel_control_run()
     } else if (sub.auto_yaw_mode == AUTO_YAW_LOOK_AT_HEADING) {
         // roll, pitch from pilot, yaw & yaw_rate from auto_control
         target_yaw_rate = sub.yaw_look_at_heading_slew * 100.0;
-        attitude_control->input_euler_angle_roll_pitch_slew_yaw(channel_roll->get_control_in(), channel_pitch->get_control_in(), get_auto_heading(), target_yaw_rate);
+        attitude_control->input_euler_angle_roll_pitch_slew_yaw_cd(channel_roll->get_control_in(), channel_pitch->get_control_in(), get_auto_heading(), target_yaw_rate);
     } else if (sub.auto_yaw_mode == AUTO_YAW_RATE) {
         // roll, pitch from pilot, and yaw_rate from auto_control
         target_yaw_rate = sub.yaw_look_at_heading_slew * 100.0;

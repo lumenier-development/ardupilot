@@ -227,8 +227,8 @@ const AP_Param::GroupInfo SIM::var_info[] = {
     // @DisplayName: Sim Speedup
     // @Description: Runs the simulation at multiples of normal speed. Do not use if realtime physics, like RealFlight, is being used
     // @Range: 1 10
-    // @User: Advanced    
-    AP_GROUPINFO("SPEEDUP",       52, SIM,  speedup, -1),
+    // @User: Advanced
+    AP_GROUPINFO("SPEEDUP",       52, SIM,  speedup, 1),
     // @Param: IMU_POS
     // @DisplayName: IMU Offsets
     // @Description: XYZ position of the IMU accelerometer relative to the body frame origin
