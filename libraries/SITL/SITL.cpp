@@ -1315,9 +1315,15 @@ const AP_Param::GroupInfo SIM::ModelParm::var_info[] = {
     AP_SUBGROUPINFO(tether_sim, "TETH_", 6, SIM::ModelParm, TetherSim),
 #endif
 
+#if HAL_SIM_AIS_ENABLED
+    // @Group: AIS_
+    // @Path: ./SIM_AIS.cpp
+    AP_SUBGROUPPTR(ais_ptr, "AIS_", 7, SIM::ModelParm, AIS),
+#endif
+
     AP_GROUPEND
 };
-    
+
 const Location post_origin {
     518752066,
     146487830,

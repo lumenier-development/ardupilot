@@ -33,6 +33,7 @@
 #include "SIM_DroneCANDevice.h"
 #include "SIM_ADSB_Sagetech_MXS.h"
 #include "SIM_Volz.h"
+#include "SIM_AIS.h"
 
 namespace SITL {
 
@@ -367,6 +368,9 @@ public:
 #endif
 #if AP_SIM_FLIGHTAXIS_ENABLED
         FlightAxis *flightaxis_ptr;
+#endif
+#if HAL_SIM_AIS_ENABLED
+        class AIS *ais_ptr;
 #endif
     };
     ModelParm models;
