@@ -48,7 +48,7 @@
 #define HAL_BOARD_SUBTYPE_LINUX_OBAL_V1    1025
 #define HAL_BOARD_SUBTYPE_LINUX_CANZERO    1026
 #define HAL_BOARD_SUBTYPE_LINUX_PILOTPI    1027
-
+#define HAL_BOARD_SUBTYPE_LINUX_POCKET2    1028
 /* HAL CHIBIOS sub-types, starting at 5000
 
    NOTE!! Do not add more subtypes unless they are really needed. Most
@@ -280,10 +280,6 @@
 #endif
 #endif
 
-#ifndef USE_LIBC_REALLOC
-#define USE_LIBC_REALLOC 1
-#endif
-
 #ifndef AP_HAL_SHARED_DMA_ENABLED
 #define AP_HAL_SHARED_DMA_ENABLED 1
 #endif
@@ -412,4 +408,8 @@
 
 #ifndef HAL_REBOOT_ON_MEMORY_ERRORS
 #define HAL_REBOOT_ON_MEMORY_ERRORS defined(IOMCU_FW)
+#endif
+
+#ifndef AP_CPU_IDLE_STATS_ENABLED
+#define AP_CPU_IDLE_STATS_ENABLED 0
 #endif

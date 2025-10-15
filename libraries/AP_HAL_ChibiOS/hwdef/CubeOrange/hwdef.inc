@@ -10,7 +10,7 @@ USB_STRING_MANUFACTURER "Hex/ProfiCNC"
 OSCILLATOR_HZ 24000000
 
 # board ID. See Tools/AP_Bootloader/board_types.txt
-APJ_BOARD_ID 140
+APJ_BOARD_ID AP_HW_CUBEORANGE
 
 FLASH_SIZE_KB 2048
 
@@ -265,7 +265,7 @@ define BOARD_TYPE_DEFAULT 3
 # allow to have have a dedicated safety switch pin
 define HAL_HAVE_SAFETY_SWITCH 1
 
-# Enable RAMTROM parameter storage.
+# Enable RAMTRON parameter storage.
 define HAL_WITH_RAMTRON 1
 
 # Setup the IMU heater
