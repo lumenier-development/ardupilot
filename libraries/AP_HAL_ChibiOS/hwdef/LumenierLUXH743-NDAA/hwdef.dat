@@ -135,12 +135,12 @@ PB0   TIM3_CH3 TIM3 PWM(13) GPIO(62) # for WS2812 LED
 # RC input (PPM)
 PA2 TIM2_CH3 TIM2 RCININT PULLDOWN LOW
 
-# VTX Power control - should be low at startup to ensure power
-PB2 VTX_PWR OUTPUT LOW GPIO(81)
+# Camera switch control - should be low at startup to ensure Camera 1 selected
+PB1 CAM_CTRL OUTPUT LOW GPIO(81)
 define RELAY1_PIN_DEFAULT 81
 
-# Camera switch control - should be low at startup to ensure Camera 1 selected
-PB1 CAM_CTRL OUTPUT LOW GPIO(82)
+# VTX Power control - should be low at startup to ensure power
+PB2 VTX_PWR OUTPUT LOW GPIO(82)
 define RELAY2_PIN_DEFAULT 82
 
 define AP_HAL_SHARED_DMA_ENABLED 1
