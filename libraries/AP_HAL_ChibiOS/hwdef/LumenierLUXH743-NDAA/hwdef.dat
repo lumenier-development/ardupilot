@@ -137,11 +137,11 @@ PA2 TIM2_CH3 TIM2 RCININT PULLDOWN LOW
 
 # VTX Power control - should be low at startup to ensure power
 PB2 VTX_PWR OUTPUT LOW GPIO(81)
-define RELAY2_PIN_DEFAULT 81
+define RELAY1_PIN_DEFAULT 81
 
 # Camera switch control - should be low at startup to ensure Camera 1 selected
 PB1 CAM_CTRL OUTPUT LOW GPIO(82)
-define RELAY3_PIN_DEFAULT 82
+define RELAY2_PIN_DEFAULT 82
 
 define AP_HAL_SHARED_DMA_ENABLED 1
 DMA_PRIORITY TIM1* TIM8* SPI6* SPI3* USART2* UART7* USART1* ADC* TIM4* TIM3*
