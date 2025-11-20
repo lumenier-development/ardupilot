@@ -414,6 +414,9 @@ void Copter::update_flight_mode()
 #endif
     attitude_control->landed_gain_reduction(copter.ap.land_complete); // Adjust gains when landed to attenuate ground oscillation
 
+    // set ekf reset handling method
+    pos_control->set_reset_handling_method(flightmode->move_vehicle_on_ekf_reset() ? AC_PosControl::EKFResetMethod::MoveVehicle : AC_PosControl::EKFResetMethod::MoveTarget);
+
     flightmode->run();
 }
 
@@ -601,8 +604,9 @@ float Mode::get_alt_above_ground_m(void) const
     if (copter.get_rangefinder_height_interpolated_m(alt_above_ground_m)) {
         return alt_above_ground_m;
     }
-    if (!pos_control->is_active_NE()) {
-        return copter.current_loc.alt;
+    if (!copter.current_loc.initialised()) {
+        // current loc uninitialised during startup, return zero
+        return 0;
     }
     if (copter.current_loc.get_alt_m(Location::AltFrame::ABOVE_TERRAIN, alt_above_ground_m)) {
         return alt_above_ground_m;
@@ -653,7 +657,7 @@ void Mode::land_run_vertical_control(bool pause_descent)
             // check if we should descend or not
             const float max_horiz_pos_error_m = copter.precland.get_max_xy_error_before_descending_m();
             Vector3f target_pos_meas_ned_m;
-            copter.precland.get_target_position_measurement_m(target_pos_meas_ned_m);
+            copter.precland.get_target_position_measurement_NED_m(target_pos_meas_ned_m);
             if (target_error_m > max_horiz_pos_error_m && !is_zero(max_horiz_pos_error_m)) {
                 // doing precland but too far away from the obstacle
                 // do not descend

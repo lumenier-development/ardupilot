@@ -784,7 +784,7 @@ int lua_serial_find_simulated_device(lua_State *L) {
 
     binding_argcheck(L, 2 + arg_offset);
 
-    const int8_t protocol = (int8_t)get_uint32(L, 1 + arg_offset, 0, 127);
+    const int8_t protocol = (int8_t)get_uint32(L, 1 + arg_offset, 0, INT8_MAX);
     uint32_t instance = get_uint16_t(L, 2 + arg_offset);
 
     auto *scripting = AP::scripting();
@@ -851,6 +851,25 @@ int lua_serial_readstring(lua_State *L) {
     luaL_pushresultsize(&b, read_bytes);
 
     return 1;
+}
+
+int lua_serial_begin(lua_State *L) {
+    const int args = lua_gettop(L);
+    if (args > 2) {
+        return luaL_argerror(L, args, "too many arguments");
+    } else if (args < 1) {
+        return luaL_argerror(L, args, "too few arguments");
+    }
+    AP_Scripting_SerialAccess * port = check_AP_Scripting_SerialAccess(L, 1);
+
+    // nil or absent argument treated as automatic baud
+    if (!lua_isnoneornil(L, 2)) {
+        port->begin(get_uint32(L, 2, 1, UINT32_MAX));
+    } else {
+        port->begin();
+    }
+
+    return 0;
 }
 
 /*

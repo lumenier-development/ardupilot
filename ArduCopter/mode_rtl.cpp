@@ -500,7 +500,7 @@ void ModeRTL::compute_return_target()
     if ((copter.fence.get_enabled_fences() & AC_FENCE_TYPE_ALT_MAX) != 0) {
         // get return target as alt-above-home so it can be compared to fence's alt
         if (rtl_path.return_target.get_alt_m(Location::AltFrame::ABOVE_HOME, target_alt_m)) {
-            float fence_alt_m = copter.fence.get_safe_alt_max();
+            float fence_alt_m = copter.fence.get_safe_alt_max_m();
             if (target_alt_m > fence_alt_m) {
                 // reduce target alt to the fence alt
                 rtl_path.return_target.alt -= (target_alt_m - fence_alt_m) * 100.0;
@@ -544,7 +544,7 @@ float ModeRTL::wp_bearing_deg() const
 // returns true if pilot's yaw input should be used to adjust vehicle's heading
 bool ModeRTL::use_pilot_yaw(void) const
 {
-    const bool allow_yaw_option = (copter.g2.rtl_options.get() & uint32_t(Options::IgnorePilotYaw)) == 0;
+    const bool allow_yaw_option = !option_is_enabled(Option::IgnorePilotYaw);
     const bool land_repositioning = g.land_repositioning && (_state == SubMode::FINAL_DESCENT);
     const bool final_landing = _state == SubMode::LAND;
     return allow_yaw_option || land_repositioning || final_landing;
@@ -566,6 +566,11 @@ bool ModeRTL::set_speed_down_ms(float speed_down_ms)
 {
     copter.wp_nav->set_speed_down_ms(speed_down_ms);
     return true;
+}
+
+bool ModeRTL::option_is_enabled(Option option) const
+{
+    return ((copter.g2.rtl_options & (uint32_t)option) != 0);
 }
 
 #endif

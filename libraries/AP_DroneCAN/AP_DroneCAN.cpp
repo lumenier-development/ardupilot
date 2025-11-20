@@ -196,7 +196,7 @@ const AP_Param::GroupInfo AP_DroneCAN::var_info[] = {
     // @Param: S1_IDX
     // @DisplayName: DroneCAN Serial1 index
     // @Description: Serial port number on remote CAN node
-    // @Range: 0 100
+    // @Range: -1 100
     // @Values: -1:Disabled,0:Serial0,1:Serial1,2:Serial2,3:Serial3,4:Serial4,5:Serial5,6:Serial6
     // @RebootRequired: True
     // @User: Advanced
@@ -317,7 +317,7 @@ bool AP_DroneCAN::add_interface(AP_HAL::CANIface* can_iface)
     return true;
 }
 
-void AP_DroneCAN::init(uint8_t driver_index, bool enable_filters)
+void AP_DroneCAN::init(uint8_t driver_index)
 {
     if (driver_index != _driver_index) {
         debug_dronecan(AP_CANManager::LOG_ERROR, "DroneCAN: init called with wrong driver_index");

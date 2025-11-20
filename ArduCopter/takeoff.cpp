@@ -85,7 +85,7 @@ void Mode::_TakeOff::do_pilot_takeoff_ms(float& pilot_climb_rate_ms)
         // tell position controller to reset alt target and reset I terms
         copter.pos_control->init_U_controller();
         if (throttle_norm >= MIN(copter.g2.takeoff_throttle_max, 0.9) || 
-            (copter.pos_control->get_measured_accel_U_mss() >= 0.5 * copter.pos_control->get_max_accel_U_mss()) ||
+            (copter.pos_control->get_estimate_accel_U_mss() >= 0.5 * copter.pos_control->get_max_accel_U_mss()) ||
             (copter.pos_control->get_vel_desired_NEU_ms().z >= constrain_float(pilot_climb_rate_ms, copter.pos_control->get_max_speed_up_ms() * 0.1, copter.pos_control->get_max_speed_up_ms() * 0.5)) || 
             (is_positive(take_off_complete_alt_m - take_off_start_alt_m) && copter.pos_control->get_pos_desired_U_m() - take_off_start_alt_m > 0.5 * (take_off_complete_alt_m - take_off_start_alt_m))) {
             // throttle > 90%
@@ -130,8 +130,8 @@ void _AutoTakeoff::run()
     }
 
     // get terrain offset
-    float terr_offset_m = 0.0f;
-    if (is_terrain_alt && !wp_nav->get_terrain_offset_m(terr_offset_m)) {
+    float terrain_u_m = 0.0f;
+    if (is_terrain_alt && !wp_nav->get_terrain_U_m(terrain_u_m)) {
         // trigger terrain failsafe
         copter.failsafe_terrain_on_event();
         return;
@@ -167,7 +167,7 @@ void _AutoTakeoff::run()
         attitude_control->reset_rate_controller_I_terms();
         attitude_control->input_thrust_vector_rate_heading_rads(pos_control->get_thrust_vector(), 0.0);
         if (throttle >= MIN(copter.g2.takeoff_throttle_max, 0.9) || 
-            (copter.pos_control->get_measured_accel_U_mss() >= 0.5 * copter.pos_control->get_max_accel_U_mss()) ||
+            (copter.pos_control->get_estimate_accel_U_mss() >= 0.5 * copter.pos_control->get_max_accel_U_mss()) ||
             (copter.pos_control->get_vel_desired_NEU_ms().z >= 0.1 * copter.pos_control->get_max_speed_up_ms()) || 
             ( no_nav_active && (pos_control->get_pos_estimate_NEU_m().z >= no_nav_alt_m))) {
             // throttle > 90%
@@ -194,7 +194,7 @@ void _AutoTakeoff::run()
     pos_control->update_NE_controller();
 
     // command the aircraft to the take off altitude
-    float pos_u_m = complete_alt_m + terr_offset_m;
+    float pos_u_m = complete_alt_m + terrain_u_m;
     float vel_zero = 0.0;
     copter.pos_control->input_pos_vel_accel_U_m(pos_u_m, vel_zero, 0.0);
     
