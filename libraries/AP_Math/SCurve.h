@@ -52,17 +52,6 @@ public:
     // initialise and clear the path
     void init();
 
-    // calculate the segment times for the trigonometric S-Curve path defined by:
-    // Sm - maximum value of the snap profile
-    // Jm - maximum value of the raised cosine jerk profile
-    // V0 - initial velocity magnitude
-    // Am - maximum constant acceleration
-    // Vm - maximum constant velocity
-    // L - Length of the path
-    // tj_out, t2_out, t4_out, t6_out are the segment durations needed to achieve the kinematic path specified by the input variables
-    // this is an internal function, static for test suite
-    static void calculate_path(float Sm, float Jm, float V0, float Am, float Vm, float L, float &Jm_out, float &tj_out, float &t2_out, float &t4_out, float &t6_out);
-
     // generate a trigonometric track in 3D space that moves over a straight line
     // between two points defined by the origin and destination
     void calculate_track(const Vector3p &origin, const Vector3p &destination, float arc_rad,
@@ -93,6 +82,17 @@ public:
 
     // time has reached the end of the sequence
     bool finished() const WARN_IF_UNUSED;
+
+    // calculate the segment times for the trigonometric S-Curve path defined by:
+    // Sm - maximum value of the snap profile
+    // Jm - maximum value of the raised cosine jerk profile
+    // V0 - initial velocity magnitude
+    // Am - maximum constant acceleration
+    // Vm - maximum constant velocity
+    // L - Length of the path
+    // tj_out, t2_out, t4_out, t6_out are the segment durations needed to achieve the kinematic path specified by the input variables
+    // this is an internal function, static for test suite
+    static void calculate_path(float Sm, float Jm, float V0, float Am, float Vm, float L, float &Jm_out, float &tj_out, float &t2_out, float &t4_out, float &t6_out);
 
 private:
 
@@ -224,7 +224,7 @@ private:
     } segment[segments_max];
 
     bool is_arc_segment;    // true if this segment is a circular arc, false if straight line
-    Vector3f seg_delta;     // total displacement vector from start to end point (NEU frame)
+    Vector3f seg_delta;     // total displacement vector from start to end point (NED frame)
     float seg_length;       // 3D scalar length of the path (arc length + vertical component)
 
     struct {
