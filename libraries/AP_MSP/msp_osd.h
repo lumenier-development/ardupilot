@@ -67,10 +67,11 @@ typedef enum {
     OSD_RSSI_DBM_VALUE,
     OSD_RC_CHANNELS,
     OSD_CAMERA_FRAME,
+    OSD_CYCLOPS_GRID,
     OSD_ITEM_COUNT // MUST BE LAST
 } osd_items_e;
 
-static_assert(OSD_ITEM_COUNT == 58, "OSD_ITEM_COUNT != 58");
+static_assert(OSD_ITEM_COUNT == 59, "OSD_ITEM_COUNT != 58");
 
 typedef enum {
     OSD_STAT_RTC_DATE_TIME,

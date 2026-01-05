@@ -658,6 +658,12 @@ const AP_Param::Info Copter::var_info[] = {
     GOBJECT(optflow,   "FLOW", AP_OpticalFlow),
 #endif
 
+#if AP_CYCLOPS_ENABLED
+    // @Group: FLOW
+    // @Path: ../libraries/AP_Cyclops/AP_Cyclops.cpp
+    GOBJECT(cyclops, "CYCLOPS", AP_Cyclops),
+#endif
+
 #if AC_PRECLAND_ENABLED
     // @Group: PLND_
     // @Path: ../libraries/AC_PrecLand/AC_PrecLand.cpp

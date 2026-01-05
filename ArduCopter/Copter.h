@@ -72,6 +72,7 @@
 #include <AP_OpticalFlow/AP_OpticalFlow.h>
 #include <AP_Winch/AP_Winch_config.h>
 #include <AP_SurfaceDistance/AP_SurfaceDistance.h>
+#include <AP_Cyclops/AP_Cyclops.h>
 
 // Configuration
 #include "defines.h"
@@ -311,6 +312,10 @@ private:
     // Optical flow sensor
 #if AP_OPTICALFLOW_ENABLED
     AP_OpticalFlow optflow;
+#endif
+
+#if AP_CYCLOPS_ENABLED
+    AP_Cyclops cyclops;
 #endif
 
     // external control library

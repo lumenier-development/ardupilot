@@ -28,6 +28,7 @@
 #include <AP_RSSI/AP_RSSI.h>
 #include <AP_RTC/AP_RTC.h>
 #include <GCS_MAVLink/GCS.h>
+#include <AP_Cyclops/AP_Cyclops.h>
 
 #include "AP_MSP.h"
 #include "AP_MSP_Telem_Backend.h"
@@ -544,6 +545,13 @@ MSPCommandResult AP_MSP_Telem_Backend::msp_process_sensor_command(uint16_t cmd_m
     }
     break;
 #endif
+#if HAL_MSP_CYCLOPS_ENABLED
+    case CYCLOPS_SENSOR_DATA: {
+        const MSP::msp_CyclopsRecvData_t *pkt = (const MSP::msp_CyclopsRecvData_t *)src->ptr;
+        msp_handle_cyclops(*pkt);
+    }
+    break;
+#endif
     }
 
     return MSP_RESULT_NO_REPLY;
@@ -568,6 +576,16 @@ void AP_MSP_Telem_Backend::msp_handle_rangefinder(const MSP::msp_rangefinder_dat
         return;
     }
     rangefinder->handle_msp(pkt);
+}
+#endif
+
+#if HAL_MSP_CYCLOPS_ENABLED
+void AP_MSP_Telem_Backend::msp_handle_cyclops(const MSP::msp_CyclopsRecvData_t &pkt) {
+    AP_Cyclops *cyclops = AP::cyclops();
+    if (cyclops == nullptr) {
+        return;
+    }
+    cyclops->handle_msp(pkt);
 }
 #endif
 

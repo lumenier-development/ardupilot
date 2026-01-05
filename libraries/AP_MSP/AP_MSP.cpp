@@ -153,6 +153,7 @@ void AP_MSP::update_osd_item_settings()
     _osd_item_settings[OSD_HOME_DIST] = &osd->screen[_msp_status.current_screen].home_dist;         // OSDn_HOMEDIST
     _osd_item_settings[OSD_NUMERICAL_HEADING] = &osd->screen[_msp_status.current_screen].heading;   // OSDn_HEADING
     _osd_item_settings[OSD_NUMERICAL_VARIO] = &osd->screen[_msp_status.current_screen].vspeed;      // OSDn_VSPEED
+    _osd_item_settings[OSD_CYCLOPS_GRID] = &osd->screen[_msp_status.current_screen].cyclops;        // OSDn_CYCLOPS
 #if HAL_WITH_ESC_TELEM
     _osd_item_settings[OSD_ESC_TMP] = &osd->screen[_msp_status.current_screen].esc_temp;            // OSDn_ESCTEMP
 #endif

@@ -45,6 +45,7 @@
 #include <AP_Vehicle/AP_Vehicle.h>
 #include <AP_RPM/AP_RPM.h>
 #include <AP_MSP/AP_MSP.h>
+#include <AP_Cyclops/AP_Cyclops.h>
 #if APM_BUILD_TYPE(APM_BUILD_Rover)
 #include <AP_WindVane/AP_WindVane.h>
 #endif
@@ -1045,6 +1046,22 @@ const AP_Param::GroupInfo AP_OSD_Screen::var_info[] = {
 	AP_SUBGROUPINFO(rrpm, "RPM", 62, AP_OSD_Screen, AP_OSD_Setting),
 #endif
 
+    // @Param: CYCLOPS_EN
+    // @DisplayName: CYCLOPS_EN
+    // @Description: Displays Cyclops grid
+    // @Values: 0:Disabled,1:Enabled
+
+    // @Param: CYCLOPS_X
+    // @DisplayName: CYCLOPS_X
+    // @Description: Horizontal position on screen
+    // @Range: 0 59
+
+    // @Param: CYCLOPS_Y
+    // @DisplayName: CYCLOPS_Y
+    // @Description: Vertical position on screen
+    // @Range: 0 21
+    AP_SUBGROUPINFO(cyclops, "CYCLOPS", 63, AP_OSD_Screen, AP_OSD_Setting),
+
     AP_GROUPEND
 };
 
@@ -1753,6 +1770,36 @@ void AP_OSD_Screen::draw_horizon(uint8_t x, uint8_t y)
         backend->write(x-1,y, false, "%c%c%c", SYMBOL(SYM_AH_CENTER_LINE_LEFT), SYMBOL(SYM_AH_CENTER), SYMBOL(SYM_AH_CENTER_LINE_RIGHT));
     }
 
+}
+
+void AP_OSD_Screen::draw_cyclops(uint8_t x, uint8_t y)
+{
+    int16_t grid_target = 0;
+
+    AP_Cyclops *cyclops_data = AP_Cyclops::get_singleton();
+    if (!cyclops_data) {
+        return;
+    }
+    
+    const AP_Cyclops::CyclopsRecvData &d = cyclops_data->get_data();
+
+    grid_target = constrain_int16((d.target_angle / 10), CYCLOPS_ANGLE_MIN, CYCLOPS_ANGLE_MAX);
+    grid_target = (((grid_target + CYCLOPS_ANGLE_MAX) * CYCLOPS_GRID_LENGTH) + CYCLOPS_ANGLE_MAX) / 180;
+
+    for(int i = 0; i<=CYCLOPS_GRID_LENGTH; i++) {
+        if (i == grid_target) {
+            backend->write(x + i, y, false, "%s", "*");
+        }
+        else if (i == CYCLOPS_GRID_MID) {
+            backend->write(x + i, y, false, "%s", "+");
+        }
+        else if ((i == CYCLOPS_GRID_START) || (i == CYCLOPS_GRID_LENGTH)) {
+            backend->write(x + i, y, false, "%s", "|");
+        }
+        else {
+            backend->write(x + i, y, false, "%s", "-");
+        }
+    }
 }
 
 void AP_OSD_Screen::draw_distance(uint8_t x, uint8_t y, float distance)
@@ -2641,6 +2688,7 @@ void AP_OSD_Screen::draw(void)
     DRAW_SETTING(eff);
     DRAW_SETTING(callsign);
     DRAW_SETTING(current2);
+    DRAW_SETTING(cyclops);
 
 #if AP_OSD_EXTENDED_LNK_STATS
     DRAW_SETTING(rc_tx_power);

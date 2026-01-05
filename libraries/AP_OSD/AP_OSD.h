@@ -236,6 +236,7 @@ private:
     AP_OSD_Setting pluscode;
 #endif
     AP_OSD_Setting sidebars{false, 4, 5};
+    AP_OSD_Setting cyclops{true, 14, 8};
 
 #if AP_OSD_EXTENDED_LNK_STATS
     // Extended link stats data panels
@@ -332,6 +333,7 @@ private:
     void draw_current2(uint8_t x, uint8_t y);
     void draw_vtx_power(uint8_t x, uint8_t y);
     void draw_hgt_abvterr(uint8_t x, uint8_t y);
+    void draw_cyclops(uint8_t x, uint8_t y);
 #if AP_FENCE_ENABLED
     void draw_fence(uint8_t x, uint8_t y);
 #endif

@@ -63,4 +63,10 @@ typedef struct PACKED {
     float pressure;
     int16_t temp; // centi-degrees C
 } msp_airspeed_data_message_t;
+
+typedef struct PACKED {
+    uint8_t num_targets_detected;
+    int16_t target_angle;
+    int16_t distance_to_target;
+} msp_CyclopsRecvData_t;
 }

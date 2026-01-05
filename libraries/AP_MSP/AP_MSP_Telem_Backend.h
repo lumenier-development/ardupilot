@@ -185,6 +185,7 @@ protected:
     void msp_handle_compass(const MSP::msp_compass_data_message_t &pkt);
     void msp_handle_baro(const MSP::msp_baro_data_message_t &pkt);
     void msp_handle_airspeed(const MSP::msp_airspeed_data_message_t &pkt);
+    void msp_handle_cyclops(const MSP::msp_CyclopsRecvData_t &pkt);
 
     // implementation specific helpers
     // we only set arming status
