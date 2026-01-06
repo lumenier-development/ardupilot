@@ -1800,6 +1800,9 @@ void AP_OSD_Screen::draw_cyclops(uint8_t x, uint8_t y)
             backend->write(x + i, y, false, "%s", "-");
         }
     }
+
+    backend->write(9, y+1, false,"%d", d.num_targets_detected);
+    backend->write(20, y+1, false,"%0.1f%c", ((float)d.distance_to_target)/10, SYMBOL(SYM_M));
 }
 
 void AP_OSD_Screen::draw_distance(uint8_t x, uint8_t y, float distance)

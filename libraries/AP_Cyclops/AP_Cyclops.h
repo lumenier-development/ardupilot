@@ -38,9 +38,9 @@ class AP_Cyclops
 public:
 
     struct __attribute__((packed)) CyclopsRecvData {
-        uint8_t num_targets_detected;
         int16_t target_angle;
         int16_t distance_to_target;
+        uint8_t num_targets_detected;
     };
 
     AP_Cyclops();  // constructor
