@@ -6,6 +6,7 @@
 #include <AP_Param/AP_Param.h>
 #include <AP_Math/AP_Math.h>
 #include <AP_MSP/msp.h>
+#include <RC_Channel/RC_Channel.h>
 
 #ifndef AP_CYCLOPS_ENABLED
 #define AP_CYCLOPS_ENABLED 1
@@ -26,29 +27,50 @@
 #define CYCLOPS_GRID_MID                9
 #define CYCLOPS_GRID_START              0
 
+#define CYCLOPS_MAX_TARGETS             3
+
 typedef enum {
-    NUM_TARGETS_DETECTED = 0,
-    TARGET_ANGLE = 1,
-    DISTANCE_TO_TARGET = 2,
-    LIST_MAX = 3
-} CYCLOPS_DATA_LIST;
+    CYCLOPS_SENSOR_NONE = 0,
+    CYCLOPS_SHORT_RANGE = 1,
+    CYCLOPS_LONG_RANGE  = 2
+} CYCLOPS_SENSOR_LIST;
+
+typedef enum {
+    CYCLOPS_NONE = 0x0,
+    CYCLOPS_RESET = 0x1,
+    CYCLOPS_SENSOR_SELECT_1 = 0x2,
+    CYCLOPS_SENSOR_SELECT_2 = 0x3
+} CYCLOPS_CMD_LIST;
+
+typedef enum {
+    ZERO_TARGETS_DETECTED = 0,
+    ONE_TARGET_DETECTED = 6,
+    TWO_TARGETS_DETECTED = 12, 
+    THREE_TARGETS_DETECTED = 18
+} CYCLOPS_NUM_TARGETS_DETECTED;
 
 class AP_Cyclops
 {
 public:
 
-    struct __attribute__((packed)) CyclopsRecvData {
-        int16_t target_angle;
+    struct __attribute__((packed)) CyclopsRadarData {
+        uint8_t target_number;
         int16_t distance_to_target;
-        uint8_t num_targets_detected;
+        int16_t target_angle;
+        uint8_t sensor_ID;
+    };
+
+    struct __attribute__((packed)) CyclopsCommand {
+        uint8_t command;
     };
 
     AP_Cyclops();  // constructor
 
-    void handle_msp(const MSP::msp_CyclopsRecvData_t &pkt);
+    void handle_msp(const MSP::msp_CyclopsRadarData_t *pkt, uint16_t packet_size);
+    void rc_control(const RC_Channel::AuxSwitchPos ch_flag);
 
     void cyclops_debug();
-    CyclopsRecvData get_data() const { return _data; }
+    const CyclopsRadarData* get_data() const { return _data; }
 
     static AP_Cyclops *get_singleton() { return _singleton; }
 
@@ -61,7 +83,11 @@ private:
     // example param (optional but typical)
     AP_Int8 _enable;
 
-    CyclopsRecvData _data{0, 0, 0};
+    CyclopsRadarData    _data[3]{0, 1, 0, 0, 
+                                 0, 0, 0, 0,
+                                 0, 0, 0, 0};
+
+    CyclopsCommand      _command{0};
 };
 
 namespace AP {

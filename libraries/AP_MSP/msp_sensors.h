@@ -65,8 +65,13 @@ typedef struct PACKED {
 } msp_airspeed_data_message_t;
 
 typedef struct PACKED {
-    int16_t target_angle;
+    uint8_t target_number;
     int16_t distance_to_target;
-    uint8_t num_targets_detected;
-} msp_CyclopsRecvData_t;
+    int16_t target_angle;
+    uint8_t sensor_ID;
+} msp_CyclopsRadarData_t;
+
+typedef struct PACKED {
+    uint8_t command;
+} msp_CyclopsCommand_t;
 }

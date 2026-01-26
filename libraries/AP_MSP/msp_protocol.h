@@ -350,4 +350,5 @@
 #define MSP2_SENSOR_COMPASS         0x1F04
 #define MSP2_SENSOR_BAROMETER       0x1F05
 #define MSP2_SENSOR_AIRSPEED        0x1F06
-#define CYCLOPS_SENSOR_DATA         0x1F25
+#define CYCLOPS_RADAR_DATA          0x1001
+#define CYCLOPS_COMMAND             0x1002

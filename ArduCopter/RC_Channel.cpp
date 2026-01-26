@@ -114,6 +114,7 @@ void RC_Channel_Copter::init_aux_function(const AUX_FUNC ch_option, const AuxSwi
     case AUX_FUNC::ARMDISARM_AIRMODE:
     case AUX_FUNC::TURBINE_START:
     case AUX_FUNC::FLIGHTMODE_PAUSE:
+    case AUX_FUNC::CYCLOPS_RC_COMMAND:
         break;
     case AUX_FUNC::ACRO_TRAINER:
     case AUX_FUNC::ATTCON_ACCEL_LIM:
@@ -660,6 +661,16 @@ bool RC_Channel_Copter::do_aux_function(const AUX_FUNC ch_option, const AuxSwitc
                 copter.g2.weathervane.allow_weathervaning(false);
                 break;
         }
+        break;
+    }
+#endif
+#if AP_CYCLOPS_ENABLED
+    case AUX_FUNC::CYCLOPS_RC_COMMAND: {
+        AP_Cyclops *cyclops = AP::cyclops();
+        if (cyclops == nullptr) {
+            break;
+        }
+        cyclops->rc_control(ch_flag);
         break;
     }
 #endif

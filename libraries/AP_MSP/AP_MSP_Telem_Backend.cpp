@@ -546,9 +546,10 @@ MSPCommandResult AP_MSP_Telem_Backend::msp_process_sensor_command(uint16_t cmd_m
     break;
 #endif
 #if HAL_MSP_CYCLOPS_ENABLED
-    case CYCLOPS_SENSOR_DATA: {
-        const MSP::msp_CyclopsRecvData_t *pkt = (const MSP::msp_CyclopsRecvData_t *)src->ptr;
-        msp_handle_cyclops(*pkt);
+    case CYCLOPS_RADAR_DATA: {
+        const MSP::msp_CyclopsRadarData_t *pkt = (const MSP::msp_CyclopsRadarData_t *)src->ptr;
+        uint16_t packet_size = src->end - src->ptr;
+        msp_handle_cyclops(pkt, packet_size);
     }
     break;
 #endif
@@ -580,12 +581,12 @@ void AP_MSP_Telem_Backend::msp_handle_rangefinder(const MSP::msp_rangefinder_dat
 #endif
 
 #if HAL_MSP_CYCLOPS_ENABLED
-void AP_MSP_Telem_Backend::msp_handle_cyclops(const MSP::msp_CyclopsRecvData_t &pkt) {
+void AP_MSP_Telem_Backend::msp_handle_cyclops(const MSP::msp_CyclopsRadarData_t *pkt, uint16_t packet_size) {
     AP_Cyclops *cyclops = AP::cyclops();
     if (cyclops == nullptr) {
         return;
     }
-    cyclops->handle_msp(pkt);
+    cyclops->handle_msp(pkt, packet_size);
 }
 #endif
 

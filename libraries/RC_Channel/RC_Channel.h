@@ -297,8 +297,10 @@ public:
         SCRIPTING_7 =        306,
         SCRIPTING_8 =        307,
 
+        CYCLOPS_RC_COMMAND =    308,
+
         // this must be higher than any aux function above
-        AUX_FUNCTION_MAX =   308,
+        AUX_FUNCTION_MAX =   309,
     };
 
     // auxiliary switch handling (n.b.: we store this as 2-bits!):
