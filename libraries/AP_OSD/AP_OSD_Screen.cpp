@@ -1810,10 +1810,24 @@ void AP_OSD_Screen::draw_cyclops(uint8_t x, uint8_t y)
     backend->write(9, y+1, false,"%d", num_targets_detected);
 
     if (d[0].distance_to_target > 0) {
-        backend->write(20, y+1, false,"%d%c", (d[0].distance_to_target), SYMBOL(SYM_M));
+        backend->write(20, y+1, false,"%.2f%c", ((float)d[0].distance_to_target / 1000), SYMBOL(SYM_M));
     }
     else {
         backend->write(20, y+1, false,"- %c", SYMBOL(SYM_M));
+    }
+
+    if (d[1].distance_to_target > 0) {
+        backend->write(20, y+2, false,"%.2f%c", ((float)d[1].distance_to_target / 1000), SYMBOL(SYM_M));
+    }
+    else {
+        backend->write(20, y+2, false,"- %c", SYMBOL(SYM_M));
+    }
+
+    if (d[2].distance_to_target > 0) {
+        backend->write(20, y+3, false,"%.2f%c", ((float)d[2].distance_to_target / 1000), SYMBOL(SYM_M));
+    }
+    else {
+        backend->write(20, y+3, false,"- %c", SYMBOL(SYM_M));
     }
 }
 

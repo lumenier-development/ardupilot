@@ -71,6 +71,7 @@ public:
 
     void cyclops_debug();
     const CyclopsRadarData* get_data() const { return _data; }
+    uint8_t get_payload_size(void);
 
     static AP_Cyclops *get_singleton() { return _singleton; }
 
@@ -88,6 +89,8 @@ private:
                                  0, 0, 0, 0};
 
     CyclopsCommand      _command{0};
+
+    uint8_t _payload_size = 0;
 };
 
 namespace AP {

@@ -18,6 +18,9 @@ AP_Cyclops::AP_Cyclops()
 void AP_Cyclops::handle_msp(const MSP::msp_CyclopsRadarData_t *pkt, uint16_t packet_size)
 {
     static_assert(sizeof(CyclopsRadarData) == 6, "CyclopsRadarData must be packed");
+
+    _payload_size = packet_size;
+
     switch (packet_size) {
         case THREE_TARGETS_DETECTED:
             _data[2].target_number         = pkt[2].target_number;
@@ -86,6 +89,10 @@ void AP_Cyclops::rc_control(const RC_Channel::AuxSwitchPos ch_flag)
             _command.command = CYCLOPS_NONE;
             break;
     }
+}
+
+uint8_t AP_Cyclops::get_payload_size(void) {
+    return _payload_size;
 }
 
 void AP_Cyclops::cyclops_debug()
