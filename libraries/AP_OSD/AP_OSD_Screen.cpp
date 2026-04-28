@@ -1784,50 +1784,90 @@ void AP_OSD_Screen::draw_cyclops(uint8_t x, uint8_t y)
     
     const AP_Cyclops::CyclopsRadarData* d = cyclops_data->get_data();
 
-    grid_target = constrain_int16((d[0].target_angle / 10), CYCLOPS_ANGLE_MIN, CYCLOPS_ANGLE_MAX);
-    grid_target = (((grid_target + CYCLOPS_ANGLE_MAX) * CYCLOPS_GRID_LENGTH) + CYCLOPS_ANGLE_MAX) / 180;
-
-    for(int i = 0; i<=CYCLOPS_GRID_LENGTH; i++) {
-        if (i == grid_target) {
-            backend->write(x + i, y, false, "%s", "*");
-        }
-        else if (i == CYCLOPS_GRID_MID) {
-            backend->write(x + i, y, false, "%s", "+");
-        }
-        else if ((i == CYCLOPS_GRID_START) || (i == CYCLOPS_GRID_LENGTH)) {
-            backend->write(x + i, y, false, "%s", "|");
-        }
-        else {
-            backend->write(x + i, y, false, "%s", "-");
-        }
-    }
-
+    // 1.) Write Number of targets detected (y)
     for (int i = 0; i < CYCLOPS_MAX_TARGETS; i++) {
         if (d[i].sensor_ID > CYCLOPS_SENSOR_NONE) {
             num_targets_detected++;
         }
     }
-    backend->write(9, y+1, false,"%d", num_targets_detected);
+    backend->write(9, y, false,"%d", num_targets_detected);
 
-    if (d[0].distance_to_target > 0) {
-        backend->write(20, y+1, false,"%.2f%c", ((float)d[0].distance_to_target / 1000), SYMBOL(SYM_M));
-    }
-    else {
-        backend->write(20, y+1, false,"- %c", SYMBOL(SYM_M));
+    // 2.) Write Target #1 grid (y+1) and Target #1 distance (y+2)
+    grid_target = constrain_int16((d[0].target_angle / 10), CYCLOPS_ANGLE_MIN, CYCLOPS_ANGLE_MAX);
+    grid_target = (((grid_target + CYCLOPS_ANGLE_MAX) * CYCLOPS_GRID_LENGTH) + CYCLOPS_ANGLE_MAX) / CYCLOPS_ANGLE_RANGE;
+
+    for(int i = 0; i<=CYCLOPS_GRID_LENGTH; i++) {
+        if (i == grid_target) {
+            backend->write(x + i, y+1, false, "%s", "*");
+        }
+        else if (i == CYCLOPS_GRID_MID) {
+            backend->write(x + i, y+1, false, "%s", "+");
+        }
+        else if ((i == CYCLOPS_GRID_START) || (i == CYCLOPS_GRID_LENGTH)) {
+            backend->write(x + i, y+1, false, "%s", "|");
+        }
+        else {
+            backend->write(x + i, y+1, false, "%s", "-");
+        }
     }
 
-    if (d[1].distance_to_target > 0) {
-        backend->write(20, y+2, false,"%.2f%c", ((float)d[1].distance_to_target / 1000), SYMBOL(SYM_M));
+    if (d[0].distance_to_target > CYCLOPS_NONE) {
+        backend->write(20, y+2, false,"%.2f%c", ((float)d[0].distance_to_target / 1000), SYMBOL(SYM_M));
     }
     else {
         backend->write(20, y+2, false,"- %c", SYMBOL(SYM_M));
     }
 
-    if (d[2].distance_to_target > 0) {
-        backend->write(20, y+3, false,"%.2f%c", ((float)d[2].distance_to_target / 1000), SYMBOL(SYM_M));
+    // 3.) Write Target #2 grid (y+3) and Target #2 distance (y+4)
+    grid_target = constrain_int16((d[1].target_angle / 10), CYCLOPS_ANGLE_MIN, CYCLOPS_ANGLE_MAX);
+    grid_target = (((grid_target + CYCLOPS_ANGLE_MAX) * CYCLOPS_GRID_LENGTH) + CYCLOPS_ANGLE_MAX) / CYCLOPS_ANGLE_RANGE;
+
+    for(int i = 0; i<=CYCLOPS_GRID_LENGTH; i++) {
+        if (i == grid_target) {
+            backend->write(x + i, y+3, false, "%s", "*");
+        }
+        else if (i == CYCLOPS_GRID_MID) {
+            backend->write(x + i, y+3, false, "%s", "+");
+        }
+        else if ((i == CYCLOPS_GRID_START) || (i == CYCLOPS_GRID_LENGTH)) {
+            backend->write(x + i, y+3, false, "%s", "|");
+        }
+        else {
+            backend->write(x + i, y+3, false, "%s", "-");
+        }
+    }
+
+    if (d[1].distance_to_target > CYCLOPS_NONE) {
+        backend->write(20, y+4, false,"%.2f%c", ((float)d[1].distance_to_target / 1000), SYMBOL(SYM_M));
     }
     else {
-        backend->write(20, y+3, false,"- %c", SYMBOL(SYM_M));
+        backend->write(20, y+4, false,"- %c", SYMBOL(SYM_M));
+    }
+
+    // 4.) Write Target #3 grid (y+5) and Target #3 distance (y+6)
+    grid_target = constrain_int16((d[2].target_angle / 10), CYCLOPS_ANGLE_MIN, CYCLOPS_ANGLE_MAX);
+    grid_target = (((grid_target + CYCLOPS_ANGLE_MAX) * CYCLOPS_GRID_LENGTH) + CYCLOPS_ANGLE_MAX) / CYCLOPS_ANGLE_RANGE;
+
+    for(int i = 0; i<=CYCLOPS_GRID_LENGTH; i++) {
+        if (i == grid_target) {
+            backend->write(x + i, y+5, false, "%s", "*");
+        }
+        else if (i == CYCLOPS_GRID_MID) {
+            backend->write(x + i, y+5, false, "%s", "+");
+        }
+        else if ((i == CYCLOPS_GRID_START) || (i == CYCLOPS_GRID_LENGTH)) {
+            backend->write(x + i, y+5, false, "%s", "|");
+        }
+        else {
+            backend->write(x + i, y+5, false, "%s", "-");
+        }
+    }
+
+    if (d[2].distance_to_target > CYCLOPS_NONE) {
+        backend->write(20, y+6, false,"%.2f%c", ((float)d[2].distance_to_target / 1000), SYMBOL(SYM_M));
+    }
+    else {
+        backend->write(20, y+6, false,"- %c", SYMBOL(SYM_M));
     }
 }
 

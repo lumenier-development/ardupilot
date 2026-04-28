@@ -20,8 +20,9 @@
 #define HAL_MSP_CYCLOPS_ENABLED AP_CYCLOPS_BACKEND_DEFAULT_ENABLED && HAL_MSP_ENABLED
 #endif
 
-#define CYCLOPS_ANGLE_MAX               90
-#define CYCLOPS_ANGLE_MIN               -90
+#define CYCLOPS_ANGLE_MAX               30
+#define CYCLOPS_ANGLE_MIN               -30
+#define CYCLOPS_ANGLE_RANGE             (CYCLOPS_ANGLE_MAX - CYCLOPS_ANGLE_MIN)
 
 #define CYCLOPS_GRID_LENGTH             18
 #define CYCLOPS_GRID_MID                9
