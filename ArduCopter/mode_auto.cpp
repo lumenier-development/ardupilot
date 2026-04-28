@@ -175,7 +175,7 @@ void ModeAuto::run()
 }
 
 // return true if a position estimate is required
-bool ModeAuto::requires_GPS() const
+bool ModeAuto::requires_position() const
 {
     // position estimate is required in all sub modes except attitude control
     return _mode != SubMode::NAV_ATTITUDE_TIME;
@@ -478,7 +478,7 @@ bool ModeAuto::wp_start(const Location& dest_loc)
 
     // initialise yaw
     // To-Do: reset the yaw only when the previous navigation command is not a WP.  this would allow removing the special check for ROI
-    if (auto_yaw.mode() != AutoYaw::Mode::ROI && !(auto_yaw.mode() == AutoYaw::Mode::FIXED && copter.g.wp_yaw_behavior == WP_YAW_BEHAVIOR_NONE)) {
+    if (auto_yaw.mode() != AutoYaw::Mode::ROI && !(auto_yaw.mode() == AutoYaw::Mode::FIXED && copter.g.wp_yaw_behavior == Copter::WPYawBehavior::NONE)) {
         auto_yaw.set_mode_to_default(false);
     }
 
@@ -1285,7 +1285,6 @@ void PayloadPlace::run()
     const uint32_t placed_check_duration_ms = 500; // how long we have to be below a throttle threshold before considering placed
 
     auto &g2 = copter.g2;
-    const auto &g = copter.g;
     auto *attitude_control = copter.attitude_control;
     const auto &pos_control = copter.pos_control;
     const auto &wp_nav = copter.wp_nav;
@@ -1356,7 +1355,7 @@ void PayloadPlace::run()
         descent_established_time_ms = now_ms;
         descent_start_altitude_m = pos_control->get_pos_desired_U_m();
         // limiting the decent rate to the limit set in wp_nav is not necessary but done for safety
-        descent_speed_ms = MIN((is_positive(g2.pldp_descent_speed_ms)) ? g2.pldp_descent_speed_ms : abs(g.land_speed_cms) * 0.01, wp_nav->get_default_speed_down_ms());
+        descent_speed_ms = MIN((is_positive(g2.pldp_descent_speed_ms)) ? g2.pldp_descent_speed_ms : copter.mode_land.get_land_speed_ms(), wp_nav->get_default_speed_down_ms());
         descent_thrust_level = 1.0;
         state = State::Descent;
         FALLTHROUGH;
@@ -1487,9 +1486,10 @@ void PayloadPlace::run()
         break;
     case State::Ascent:
     case State::Done:
-        float vel = 0.0;
+        float vel_d_zero = 0.0;
         copter.flightmode->land_run_horizontal_control();
-        pos_control->input_pos_vel_accel_D_m(descent_start_altitude_m, vel, 0.0);
+        float pos_d_m = -descent_start_altitude_m;
+        pos_control->input_pos_vel_accel_D_m(pos_d_m, vel_d_zero, 0.0);
         break;
     }
     pos_control->D_update_controller();
@@ -1851,7 +1851,7 @@ void ModeAuto::do_spline_wp(const AP_Mission::Mission_Command& cmd)
 
     // initialise yaw
     // To-Do: reset the yaw only when the previous navigation command is not a WP.  this would allow removing the special check for ROI
-    if (auto_yaw.mode() != AutoYaw::Mode::ROI && !(auto_yaw.mode() == AutoYaw::Mode::FIXED && copter.g.wp_yaw_behavior == WP_YAW_BEHAVIOR_NONE)) {
+    if (auto_yaw.mode() != AutoYaw::Mode::ROI && !(auto_yaw.mode() == AutoYaw::Mode::FIXED && copter.g.wp_yaw_behavior == Copter::WPYawBehavior::NONE)) {
         auto_yaw.set_mode_to_default(false);
     }
 
