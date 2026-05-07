@@ -147,6 +147,9 @@
  # include <AP_Winch/AP_Winch.h>
 #endif
 #include <AP_RPM/AP_RPM.h>
+#if AP_PL_K_ENABLED
+#include <PL_K/PL_K.h>
+#endif
 
 #if AP_SCRIPTING_ENABLED
 #include <AP_Scripting/AP_Scripting.h>
@@ -300,6 +303,10 @@ private:
 
 #if AP_RPM_ENABLED
     AP_RPM rpm_sensor;
+#endif
+
+#if AP_PL_K_ENABLED
+    PL_K pl_k;
 #endif
 
     // Inertial Navigation EKF - different viewpoint

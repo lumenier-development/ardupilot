@@ -53,6 +53,9 @@
 #include <ctype.h>
 #include <GCS_MAVLink/GCS.h>
 #include <AC_Fence/AC_Fence.h>
+#if AP_PL_K_ENABLED
+#include <PL_K/PL_K.h>
+#endif
 
 #if AP_OSD_EXTENDED_LNK_STATS
 // We need to this file to access the CRSF telemetry objects which contains the link stats data
@@ -1043,6 +1046,9 @@ const AP_Param::GroupInfo AP_OSD_Screen::var_info[] = {
 	// @Description: Vertical position on screen
 	// @Range: 0 15
 	AP_SUBGROUPINFO(rrpm, "RPM", 62, AP_OSD_Screen, AP_OSD_Setting),
+#endif
+#if AP_PL_K_ENABLED
+    AP_SUBGROUPINFO(pl_k_text, "PLK", 63, AP_OSD_Screen, AP_OSD_Setting),
 #endif
 
     AP_GROUPEND
@@ -2483,6 +2489,17 @@ void AP_OSD_Screen::draw_callsign(uint8_t x, uint8_t y)
 #endif
 }
 
+#if AP_PL_K_ENABLED
+void AP_OSD_Screen::draw_pl_k_text(uint8_t x, uint8_t y)
+{
+    PL_K *pl_k = PL_K::get_singleton();
+    if (pl_k == nullptr) {
+        return;
+    }
+    backend->write(x, y, false, "%s", pl_k->get_payload());
+}
+#endif
+
 void AP_OSD_Screen::draw_current2(uint8_t x, uint8_t y)
 {
     draw_current(1, x, y);
@@ -2641,6 +2658,9 @@ void AP_OSD_Screen::draw(void)
     DRAW_SETTING(eff);
     DRAW_SETTING(callsign);
     DRAW_SETTING(current2);
+#if AP_PL_K_ENABLED
+    DRAW_SETTING(pl_k_text);
+#endif
 
 #if AP_OSD_EXTENDED_LNK_STATS
     DRAW_SETTING(rc_tx_power);
