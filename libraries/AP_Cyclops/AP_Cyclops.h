@@ -31,16 +31,14 @@
 #define CYCLOPS_MAX_TARGETS             3
 
 typedef enum {
-    CYCLOPS_SENSOR_NONE = 0,
+    CYCLOPS_SENSOR_AUTO = 0,
     CYCLOPS_SHORT_RANGE = 1,
     CYCLOPS_LONG_RANGE  = 2
 } CYCLOPS_SENSOR_LIST;
 
 typedef enum {
-    CYCLOPS_NONE = 0x0,
-    CYCLOPS_RESET = 0x1,
-    CYCLOPS_SENSOR_SELECT_1 = 0x2,
-    CYCLOPS_SENSOR_SELECT_2 = 0x3
+    CYCLOPS_NORMAL = 0x0,
+    CYCLOPS_REBOOT = 0x1
 } CYCLOPS_CMD_LIST;
 
 typedef enum {
@@ -62,7 +60,10 @@ public:
     };
 
     struct __attribute__((packed)) CyclopsCommand {
-        uint8_t command;
+        uint16_t max_range;
+        uint16_t min_range;
+        uint8_t sensor_select;
+        uint8_t mode;
     };
 
     AP_Cyclops();  // constructor
@@ -73,6 +74,9 @@ public:
     void cyclops_debug();
     const CyclopsRadarData* get_data() const { return _data; }
     uint8_t get_payload_size(void);
+    bool has_pending_command() const { return _command_pending; }
+    CyclopsCommand consume_pending_command() { _command_pending = false; return _command; }
+    const CyclopsCommand* get_command() const { return &_command; }
 
     static AP_Cyclops *get_singleton() { return _singleton; }
 
@@ -89,7 +93,8 @@ private:
                                  0, 0, 0, 0,
                                  0, 0, 0, 0};
 
-    CyclopsCommand      _command{0};
+    CyclopsCommand      _command{0, 0, 1, 0};
+    bool                _command_pending = false;
 
     uint8_t _payload_size = 0;
 };

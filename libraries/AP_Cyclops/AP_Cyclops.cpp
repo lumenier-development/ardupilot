@@ -50,22 +50,22 @@ void AP_Cyclops::handle_msp(const MSP::msp_CyclopsRadarData_t *pkt, uint16_t pac
      */
     switch (packet_size) {
         case ZERO_TARGETS_DETECTED:
-            _data[0].target_number         = CYCLOPS_NONE;
-            _data[0].distance_to_target    = CYCLOPS_NONE;
-            _data[0].target_angle          = CYCLOPS_NONE;
-            _data[0].sensor_ID             = CYCLOPS_SENSOR_NONE;
+            _data[0].target_number         = CYCLOPS_NORMAL;
+            _data[0].distance_to_target    = CYCLOPS_NORMAL;
+            _data[0].target_angle          = CYCLOPS_NORMAL;
+            _data[0].sensor_ID             = CYCLOPS_SENSOR_AUTO;
             [[fallthrough]];
         case ONE_TARGET_DETECTED:
-            _data[1].target_number         = CYCLOPS_NONE;
-            _data[1].distance_to_target    = CYCLOPS_NONE;
-            _data[1].target_angle          = CYCLOPS_NONE;
-            _data[1].sensor_ID             = CYCLOPS_SENSOR_NONE;
+            _data[1].target_number         = CYCLOPS_NORMAL;
+            _data[1].distance_to_target    = CYCLOPS_NORMAL;
+            _data[1].target_angle          = CYCLOPS_NORMAL;
+            _data[1].sensor_ID             = CYCLOPS_SENSOR_AUTO;
             [[fallthrough]];
         case TWO_TARGETS_DETECTED:
-            _data[2].target_number         = CYCLOPS_NONE;
-            _data[2].distance_to_target    = CYCLOPS_NONE;
-            _data[2].target_angle          = CYCLOPS_NONE;
-            _data[2].sensor_ID             = CYCLOPS_SENSOR_NONE;
+            _data[2].target_number         = CYCLOPS_NORMAL;
+            _data[2].distance_to_target    = CYCLOPS_NORMAL;
+            _data[2].target_angle          = CYCLOPS_NORMAL;
+            _data[2].sensor_ID             = CYCLOPS_SENSOR_AUTO;
             break;
         default:
             break;
@@ -74,21 +74,16 @@ void AP_Cyclops::handle_msp(const MSP::msp_CyclopsRadarData_t *pkt, uint16_t pac
 
 void AP_Cyclops::rc_control(const RC_Channel::AuxSwitchPos ch_flag)
 {
-    static_assert(sizeof(CyclopsCommand) == 1, "CyclopsCommand must be packed");
+    static_assert(sizeof(CyclopsCommand) == 6, "CyclopsCommand must be packed");
     switch (ch_flag) {
-        case RC_Channel::AuxSwitchPos::LOW:
-            _command.command = CYCLOPS_SENSOR_SELECT_1;
-            break;
-        case RC_Channel::AuxSwitchPos::MIDDLE:
-            _command.command = CYCLOPS_SENSOR_SELECT_2;
-            break;
         case RC_Channel::AuxSwitchPos::HIGH:
-            _command.command = CYCLOPS_RESET;
+            _command.sensor_select = CYCLOPS_LONG_RANGE;
             break;
         default:
-            _command.command = CYCLOPS_NONE;
+            _command.sensor_select = CYCLOPS_SHORT_RANGE;
             break;
     }
+    _command_pending = true;
 }
 
 uint8_t AP_Cyclops::get_payload_size(void) {

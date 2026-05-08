@@ -72,6 +72,9 @@ typedef struct PACKED {
 } msp_CyclopsRadarData_t;
 
 typedef struct PACKED {
-    uint8_t command;
+    uint16_t max_range;
+    uint16_t min_range;
+    uint8_t  sensor_select;
+    uint8_t  mode;
 } msp_CyclopsCommand_t;
 }

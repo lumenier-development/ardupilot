@@ -1783,14 +1783,16 @@ void AP_OSD_Screen::draw_cyclops(uint8_t x, uint8_t y)
     }
     
     const AP_Cyclops::CyclopsRadarData* d = cyclops_data->get_data();
+    const AP_Cyclops::CyclopsCommand* c = cyclops_data->get_command();
 
     // 1.) Write Number of targets detected (y)
     for (int i = 0; i < CYCLOPS_MAX_TARGETS; i++) {
-        if (d[i].sensor_ID > CYCLOPS_SENSOR_NONE) {
+        if (d[i].sensor_ID > CYCLOPS_SENSOR_AUTO) {
             num_targets_detected++;
         }
     }
     backend->write(9, y, false,"%d", num_targets_detected);
+    backend->write(20, y, false, "%d", c->sensor_select);
 
     // 2.) Write Target #1 grid (y+1) and Target #1 distance (y+2)
     grid_target = constrain_int16((d[0].target_angle / 10), CYCLOPS_ANGLE_MIN, CYCLOPS_ANGLE_MAX);
@@ -1811,7 +1813,7 @@ void AP_OSD_Screen::draw_cyclops(uint8_t x, uint8_t y)
         }
     }
 
-    if (d[0].distance_to_target > CYCLOPS_NONE) {
+    if (d[0].distance_to_target > CYCLOPS_NORMAL) {
         backend->write(20, y+2, false,"%.2f%c", ((float)d[0].distance_to_target / 1000), SYMBOL(SYM_M));
     }
     else {
@@ -1837,7 +1839,7 @@ void AP_OSD_Screen::draw_cyclops(uint8_t x, uint8_t y)
         }
     }
 
-    if (d[1].distance_to_target > CYCLOPS_NONE) {
+    if (d[1].distance_to_target > CYCLOPS_NORMAL) {
         backend->write(20, y+4, false,"%.2f%c", ((float)d[1].distance_to_target / 1000), SYMBOL(SYM_M));
     }
     else {
@@ -1863,7 +1865,7 @@ void AP_OSD_Screen::draw_cyclops(uint8_t x, uint8_t y)
         }
     }
 
-    if (d[2].distance_to_target > CYCLOPS_NONE) {
+    if (d[2].distance_to_target > CYCLOPS_NORMAL) {
         backend->write(20, y+6, false,"%.2f%c", ((float)d[2].distance_to_target / 1000), SYMBOL(SYM_M));
     }
     else {

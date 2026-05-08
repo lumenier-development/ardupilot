@@ -96,6 +96,14 @@ bool AP_MSP_Telem_Backend::init_uart()
 
 void AP_MSP_Telem_Backend::process_outgoing_data()
 {
+#if HAL_MSP_CYCLOPS_ENABLED
+    AP_Cyclops *cyclops = AP::cyclops();
+    if (cyclops != nullptr && cyclops->has_pending_command()) {
+        const AP_Cyclops::CyclopsCommand pending = cyclops->consume_pending_command();
+        const MSP::msp_CyclopsCommand_t cmd { pending.max_range, pending.min_range, pending.sensor_select, pending.mode };
+        msp_send_packet(CYCLOPS_COMMAND, MSP::MSP_V2_NATIVE, &cmd, sizeof(cmd), false);
+    }
+#endif
     if (is_scheduler_enabled()) {
         AP_RCTelemetry::run_wfq_scheduler();
     }
