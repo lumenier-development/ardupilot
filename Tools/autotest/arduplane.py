@@ -3026,7 +3026,8 @@ class AutoTestPlane(vehicle_test_suite.TestSuite):
         self.change_mode('LOITER')
         self.delay_sim_time(10)
         self.change_mode('CIRCLE')
-        self.wait_altitude(alt*0.9, alt*1.1, minimum_duration=10, relative=True)
+        self.wait_altitude(alt*0.9, alt*1.1, minimum_duration=10,
+                           altitude_source="TERRAIN_REPORT.current_height")
         self.fly_home_land_and_disarm()
 
     def fly_generic_mission(self, filename, mission_timeout=60.0, strict=True,
@@ -5190,6 +5191,7 @@ class AutoTestPlane(vehicle_test_suite.TestSuite):
         )
         self.set_parameters({
             "ARSPD_USE": 0.0,
+            "TKOFF_LVL_ALT": 30,
         })
         self.change_mode("TAKEOFF")
 
@@ -5233,7 +5235,7 @@ class AutoTestPlane(vehicle_test_suite.TestSuite):
         self.change_mode("TAKEOFF")
 
         # waiting for the EKF to be happy won't work
-        self.delay_sim_time(20)
+        self.wait_prearm_sys_status_healthy()
         self.arm_vehicle()
 
         target_alt = self.get_parameter("TKOFF_ALT")

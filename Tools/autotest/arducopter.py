@@ -844,13 +844,13 @@ class AutoTestCopter(vehicle_test_suite.TestSuite):
         self.do_RTL()
 
     # enter RTL mode and wait for the vehicle to disarm
-    def do_RTL(self, distance_min=None, check_alt=True, distance_max=10, timeout=250, quiet=False):
+    def do_RTL(self, distance_min=None, check_alt=True, alt_max=1, distance_max=10, timeout=250, quiet=False):
         """Enter RTL mode and wait for the vehicle to disarm at Home."""
         self.change_mode("RTL")
         self.zero_throttle()
-        self.wait_rtl_complete(check_alt=check_alt, distance_max=distance_max, timeout=timeout, quiet=True)
+        self.wait_rtl_complete(check_alt=check_alt, alt_max=alt_max, distance_max=distance_max, timeout=timeout, quiet=True)
 
-    def wait_rtl_complete(self, check_alt=True, distance_max=10, timeout=250, quiet=False):
+    def wait_rtl_complete(self, check_alt=True, alt_max=1, distance_max=10, timeout=250, quiet=False):
         """Wait for RTL to reach home and disarm"""
         self.progress("Waiting RTL to reach Home and disarm")
         tstart = self.get_sim_time()
@@ -859,7 +859,7 @@ class AutoTestCopter(vehicle_test_suite.TestSuite):
             alt = m.relative_alt / 1000.0 # mm -> m
             home_distance = self.distance_to_home(use_cached_home=True)
             home = ""
-            alt_valid = alt <= 1
+            alt_valid = alt <= alt_max
             distance_valid = home_distance < distance_max
             if check_alt:
                 if alt_valid and distance_valid:
@@ -2933,7 +2933,7 @@ class AutoTestCopter(vehicle_test_suite.TestSuite):
                 raise NotAchievedException("fly_gps_glitch_loiter_test2 failed, roll or pitch moved during GPS glitch")
 
         # RTL, remove glitch and reboot sitl
-        self.do_RTL()
+        self.do_RTL(alt_max=2)
         self.context_pop()
         self.reboot_sitl()
 
@@ -3355,6 +3355,8 @@ class AutoTestCopter(vehicle_test_suite.TestSuite):
 
         self.takeoff(20)
 
+        self.change_mode('ALT_HOLD')
+
         self.progress("Flipping in roll")
         self.set_rc(1, 1700)
         self.send_cmd_do_set_mode('FLIP') # don't wait for success
@@ -3364,9 +3366,8 @@ class AutoTestCopter(vehicle_test_suite.TestSuite):
         self.progress("Waiting for level")
         self.set_rc(1, 1500) # can't change quickly enough!
         self.wait_attitude(despitch=0, desroll=0, tolerance=5)
-
+        self.wait_mode('ALT_HOLD')
         self.progress("Regaining altitude")
-        self.change_mode('ALT_HOLD')
         self.wait_altitude(19, 60, relative=True)
 
         self.progress("Flipping in pitch")
@@ -3379,6 +3380,9 @@ class AutoTestCopter(vehicle_test_suite.TestSuite):
         self.progress("Waiting for level")
         self.set_rc(2, 1500) # can't change quickly enough!
         self.wait_attitude(despitch=0, desroll=0, tolerance=5)
+        self.wait_mode('ALT_HOLD')
+        self.progress("Regaining altitude")
+        self.wait_altitude(19, 60, relative=True)
 
         self.do_RTL()
 
@@ -11925,6 +11929,10 @@ class AutoTestCopter(vehicle_test_suite.TestSuite):
 
         self.change_mode("LOITER")
         self.wait_ready_to_arm(require_absolute=False)
+        # require_absolute=False does not wait for the EKF origin (and thus home)
+        # to be set. Block until home is set so the GUIDED takeoff's ABOVE_HOME
+        # alt frame conversion succeeds.
+        self.poll_home_position()
         self.arm_vehicle()
         self.takeoffAndMoveAway()
         self.do_RTL()
