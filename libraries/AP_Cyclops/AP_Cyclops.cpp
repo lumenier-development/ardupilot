@@ -74,12 +74,14 @@ void AP_Cyclops::handle_msp(const MSP::msp_CyclopsRadarData_t *pkt, uint16_t pac
 
 void AP_Cyclops::rc_control(const RC_Channel::AuxSwitchPos ch_flag)
 {
-    static_assert(sizeof(CyclopsCommand) == 6, "CyclopsCommand must be packed");
+    static_assert(sizeof(CyclopsCommand) == 7, "CyclopsCommand must be packed");
     switch (ch_flag) {
         case RC_Channel::AuxSwitchPos::HIGH:
+            _command.sensor_ID = CYCLOPS_LONG_RANGE;
             _command.sensor_select = CYCLOPS_LONG_RANGE;
             break;
         default:
+            _command.sensor_ID = CYCLOPS_SHORT_RANGE;
             _command.sensor_select = CYCLOPS_SHORT_RANGE;
             break;
     }

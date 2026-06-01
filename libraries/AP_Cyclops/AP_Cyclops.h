@@ -62,6 +62,7 @@ public:
     struct __attribute__((packed)) CyclopsCommand {
         uint16_t max_range;
         uint16_t min_range;
+        uint8_t sensor_ID;
         uint8_t sensor_select;
         uint8_t mode;
     };
@@ -93,7 +94,7 @@ private:
                                  0, 0, 0, 0,
                                  0, 0, 0, 0};
 
-    CyclopsCommand      _command{0, 0, 1, 0};
+    CyclopsCommand      _command{0, 0, 1, 1, 0};
     bool                _command_pending = false;
 
     uint8_t _payload_size = 0;
