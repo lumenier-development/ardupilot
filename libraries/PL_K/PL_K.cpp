@@ -22,6 +22,12 @@ void PL_K::init()
 
 void PL_K::update()
 {
+    if (_last_message_ms != 0 && AP_HAL::millis() - _last_message_ms > 2000) {
+        strncpy(_payload, "NO PAYLOAD", PAYLOAD_SIZE);
+        _payload[PAYLOAD_SIZE] = '\0';
+        _last_message_ms = 0;
+    }
+
     if (_uart == nullptr) {
         return;
     }
@@ -53,6 +59,7 @@ void PL_K::parse_line(const char *line)
     // TODO: parse ASCII message fields from 'line' and populate _payload
     strncpy(_payload, line, PAYLOAD_SIZE);
     _payload[PAYLOAD_SIZE] = '\0';
+    _last_message_ms = AP_HAL::millis();
 }
 
 #endif  // AP_PL_K_ENABLED

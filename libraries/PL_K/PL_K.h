@@ -31,6 +31,8 @@ private:
 
     void parse_line(const char *line);
 
+    uint32_t _last_message_ms = 0;
+
     // buffer holding the most recent 8-character payload, null-terminated
     static const uint8_t PAYLOAD_SIZE = 16;
     char _payload[PAYLOAD_SIZE + 1] = "NO PAYLOAD";
