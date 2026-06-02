@@ -33,7 +33,7 @@ private:
 
     // buffer holding the most recent 8-character payload, null-terminated
     static const uint8_t PAYLOAD_SIZE = 16;
-    char _payload[PAYLOAD_SIZE + 1] = "NO DATA";
+    char _payload[PAYLOAD_SIZE + 1] = "NO PAYLOAD";
 
 public:
     const char *get_payload() const { return _payload; }
