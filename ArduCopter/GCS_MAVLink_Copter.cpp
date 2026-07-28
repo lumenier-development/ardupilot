@@ -434,11 +434,6 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_int_do_reposition(const mavlink_co
         return MAV_RESULT_DENIED;
     }
 
-    // sanity check location
-    if (!check_latlng(packet.x, packet.y)) {
-        return MAV_RESULT_DENIED;
-    }
-
     Location request_location;
     if (!location_from_command_t(packet, request_location)) {
         return MAV_RESULT_DENIED;
@@ -1267,7 +1262,10 @@ void GCS_MAVLINK_Copter::send_wind() const
         // valid wind estimate on copters
         return;
     }
-    const Vector3f wind = AP::ahrs().wind_estimate();
+    Vector3f wind;
+    // send the estimate even if it is not marked valid, to preserve
+    // existing behaviour
+    IGNORE_RETURN(AP::ahrs().get_wind(wind));
     mavlink_msg_wind_send(
         chan,
         degrees(atan2f(-wind.y, -wind.x)),
@@ -1301,12 +1299,11 @@ uint8_t GCS_MAVLINK_Copter::high_latency_tgt_heading() const
     return 0;     
 }
     
-uint16_t GCS_MAVLINK_Copter::high_latency_tgt_dist() const
+uint16_t GCS_MAVLINK_Copter::high_latency_tgt_dist_dam() const
 {
     if (copter.ap.initialised) {
-        // return units are dm
         const Mode *flightmode = copter.flightmode;
-        return MIN(flightmode->wp_distance_m(), UINT16_MAX) / 10;
+        return MIN(static_cast<uint16_t>(flightmode->wp_distance_m() * 0.1), UINT16_MAX);
     }
     return 0;
 }
@@ -1326,7 +1323,9 @@ uint8_t GCS_MAVLINK_Copter::high_latency_wind_speed() const
     Vector3f wind;
     // return units are m/s*5
     if (AP::ahrs().airspeed_vector_TAS(airspeed_vec_bf)) {
-        wind = AP::ahrs().wind_estimate();
+        // use the estimate even if it is not marked valid, to preserve
+        // existing behaviour
+        IGNORE_RETURN(AP::ahrs().get_wind(wind));
         return wind.xy().length() * 5;
     }
     return 0; 
@@ -1338,7 +1337,9 @@ uint8_t GCS_MAVLINK_Copter::high_latency_wind_direction() const
     Vector3f wind;
     // return units are deg/2
     if (AP::ahrs().airspeed_vector_TAS(airspeed_vec_bf)) {
-        wind = AP::ahrs().wind_estimate();
+        // use the estimate even if it is not marked valid, to preserve
+        // existing behaviour
+        IGNORE_RETURN(AP::ahrs().get_wind(wind));
         // need to convert -180->180 to 0->360/2
         return wrap_360(degrees(atan2f(-wind.y, -wind.x))) / 2;
     }
