@@ -200,8 +200,6 @@ void UARTDriver::_begin(uint32_t baud, uint16_t rxSpace, uint16_t txSpace)
         _readbuffer.clear();
         _writebuffer.clear();
     }
-
-    _set_nonblocking(_fd);
 }
 
 void UARTDriver::_end()
@@ -734,11 +732,6 @@ bool UARTDriver::_select_check(int fd)
     return false;
 }
 
-void UARTDriver::_set_nonblocking(int fd)
-{
-    unsigned v = fcntl(fd, F_GETFL, 0);
-    fcntl(fd, F_SETFL, v | O_NONBLOCK);
-}
 
 bool UARTDriver::set_unbuffered_writes(bool on) {
     if (_fd == -1) {
@@ -821,9 +814,9 @@ uint16_t UARTDriver::read_from_async_csv(uint8_t *buffer, uint16_t space)
                         break;
                     }
                     if (!hex_twochars_to_uint8((const char*)&logic_async_csv.term[2], logic_async_csv.loaded_data.b)) {
-                        // invalid character
-                        retcode = AP_CSVReader::RetCode::ERROR;
-                        return 0;
+                        // invalid character; panic as we do for other
+                        // malformed-CSV cases rather than silently stopping
+                        AP_HAL::panic("Malformed CSV?");
                     }
                     break;
                 case 2:  // error

@@ -599,7 +599,7 @@ static const struct AP_Param::defaults_table_struct defaults_table[] = {
     { "Q_LOIT_SPEED_MS",  5.0 },
     { "Q_WP_SPD",         5.0 },
     { "Q_WP_ACC",         1.0 },
-    { "Q_P_JERK_NE",      2   },
+    { "Q_P_NE_JERK",      2   },
     // lower rotational accel limits
     { "Q_A_ACC_R_MAX", 400 },
     { "Q_A_ACC_P_MAX", 400 },
@@ -1501,7 +1501,9 @@ void SLT_Transition::update()
             if (plane.quadplane.tiltrotor.get_forward_throttle(throttle)) {
                 // Reset the TECS minimum throttle to match throttle of forward thrust motors
                 // and set the throttle channel slew rate limiter to prevent a sudden drop in throttle
-                plane.TECS_controller.set_throttle_min(throttle, true);
+                if (plane.control_mode->does_auto_throttle()) {
+                    plane.TECS_controller.set_throttle_min(throttle, true);
+                }
                 SRV_Channels::set_slew_last_scaled_output(SRV_Channel::k_throttle, throttle * 100);
                 SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, throttle * 100);
             }
@@ -1620,7 +1622,9 @@ void SLT_Transition::update()
             if (plane.quadplane.tiltrotor.get_forward_throttle(throttle)) {
                 // Reset the TECS minimum throttle to match throttle of forward thrust motors
                 // and set the throttle channel slew rate limiter to prevent a sudden drop in throttle
-                plane.TECS_controller.set_throttle_min(throttle, true);
+                if (plane.control_mode->does_auto_throttle()) {
+                    plane.TECS_controller.set_throttle_min(throttle, true);
+                }
                 SRV_Channels::set_slew_last_scaled_output(SRV_Channel::k_throttle, throttle * 100);
                 SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, throttle * 100);
             }

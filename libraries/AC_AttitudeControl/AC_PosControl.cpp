@@ -126,23 +126,23 @@ const AP_Param::GroupInfo AC_PosControl::var_info[] = {
 
     // IDs 8,9 used for _TC_XY and _TC_Z in beta release candidate
 
-    // @Param: _JERK_NE
+    // @Param: _NE_JERK
     // @DisplayName: Jerk limit for the horizontal kinematic input shaping
     // @Description: Jerk limit of the horizontal kinematic path generation used to determine how quickly the aircraft varies the acceleration target
     // @Units: m/s/s/s
     // @Range: 1 50
     // @Increment: 1
     // @User: Advanced
-    AP_GROUPINFO("_JERK_NE", 10, AC_PosControl, _shaping_jerk_ne_msss, POSCONTROL_JERK_NE_MSSS),
+    AP_GROUPINFO("_NE_JERK", 10, AC_PosControl, _shaping_jerk_ne_msss, POSCONTROL_JERK_NE_MSSS),
 
-    // @Param: _JERK_D
+    // @Param: _D_JERK
     // @DisplayName: Jerk limit for the vertical kinematic input shaping
     // @Description: Jerk limit of the vertical kinematic path generation used to determine how quickly the aircraft varies the acceleration target
     // @Units: m/s/s/s
     // @Range: 1 50
     // @Increment: 1
     // @User: Advanced
-    AP_GROUPINFO("_JERK_D", 11, AC_PosControl, _shaping_jerk_d_msss, POSCONTROL_JERK_D_MSSS),
+    AP_GROUPINFO("_D_JERK", 11, AC_PosControl, _shaping_jerk_d_msss, POSCONTROL_JERK_D_MSSS),
 
     // @Param: _D_VEL_P
     // @DisplayName: Velocity (vertical) controller P gain
@@ -709,8 +709,10 @@ void AC_PosControl::NE_update_controller()
     }
     _last_update_ne_ticks = AP::scheduler().ticks32();
 
-    float ahrsGndSpdLimit, ahrsControlScaleXY;
-    AP::ahrs().getControlLimits(ahrsGndSpdLimit, ahrsControlScaleXY);
+    // the estimator might require scaling down of control
+    // (e.g. because of sensors being used to arrive at attitude
+    // estimate):
+    const float ahrsControlScaleXY = AP::ahrs().get_control_gain_scaler_XY();
 
     // Update lateral position, velocity, and acceleration offsets using path shaping
     NE_update_offsets();
@@ -1100,7 +1102,7 @@ void AC_PosControl::D_update_controller()
 
     // P controller: convert position error to velocity target
     _vel_target_ned_ms.z = _p_pos_d_m.update_all(_pos_target_ned_m.z, _pos_estimate_ned_m.z);
-    _vel_target_ned_ms.z *= AP::ahrs().getControlScaleZ();
+    _vel_target_ned_ms.z *= AP::ahrs().get_control_gain_scaler_Z();
 
     _pos_desired_ned_m.z = _pos_target_ned_m.z - (_pos_offset_ned_m.z + _pos_terrain_d_m);
 
@@ -1111,7 +1113,7 @@ void AC_PosControl::D_update_controller()
 
     // PID controller: convert velocity error to acceleration
     _accel_target_ned_mss.z = _pid_vel_d_m.update_all(_vel_target_ned_ms.z, _vel_estimate_ned_ms.z, _dt_s, _motors.limit.throttle_lower, _motors.limit.throttle_upper);
-    _accel_target_ned_mss.z *= AP::ahrs().getControlScaleZ();
+    _accel_target_ned_mss.z *= AP::ahrs().get_control_gain_scaler_Z();
 
     // add feed forward component
     _accel_target_ned_mss.z += _accel_desired_ned_mss.z + _accel_offset_ned_mss.z + _accel_terrain_d_mss;

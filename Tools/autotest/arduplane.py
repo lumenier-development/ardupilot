@@ -23,6 +23,7 @@ from pysim import vehicleinfo
 from vehicle_test_suite import MAV_POS_TARGET_TYPE_MASK
 from vehicle_test_suite import AltFrame
 from vehicle_test_suite import AutoTestTimeoutException
+from vehicle_test_suite import Location
 from vehicle_test_suite import NotAchievedException
 from vehicle_test_suite import OldpymavlinkException
 from vehicle_test_suite import PreconditionFailedException
@@ -3216,7 +3217,8 @@ class AutoTestPlane(vehicle_test_suite.TestSuite):
                                    dist_to_final_wp_threshold_m=dist_to_final_wp_threshold_m)
 
     def fly_external_AHRS(self, sim, eahrs_type,
-                          dist_to_final_wp_threshold_m: float | None = None):
+                          dist_to_final_wp_threshold_m: float | None = None,
+                          max_position_lag_m=0.4):
         """Fly with external AHRS"""
         # The external AHRS drivers parse their serial stream on a
         # real-time thread.  At the default plane speedup (100x) that
@@ -3247,6 +3249,7 @@ class AutoTestPlane(vehicle_test_suite.TestSuite):
         self.wait_ready_to_arm()
         self.arm_vehicle()
         self.fly_generic_mission("externalahrs.txt", dist_to_final_wp_threshold_m=dist_to_final_wp_threshold_m)
+        self.check_EAHRS_position_lag(max_position_lag_m)
 
     def wait_and_maintain_wind_estimate(
             self,
@@ -3564,6 +3567,63 @@ class AutoTestPlane(vehicle_test_suite.TestSuite):
         '''Test MicroStrain EAHRS series 5 support'''
         self.fly_external_AHRS("MicroStrain5", 2)
 
+    def check_EAHRS_position_lag(self, max_mean_error_m):
+        '''check logged AHRS position against simulator truth.  POS and
+        SIM are written back-to-back by AP_AHRS logging, so each pair
+        compares the estimate and the truth at effectively the same
+        instant.  ExternalAHRS extrapolates its position forward by
+        velocity from the last solution timestamp; a backend which
+        fails to stamp that timestamp reports a position stale by up
+        to one solution interval, an error proportional to speed.'''
+        dfreader = self.dfreader_for_current_onboard_log()
+        prev_sim = None
+        pos = None
+        count = 0
+        error_sum = 0.0
+        error_max = 0.0
+        while True:
+            m = dfreader.recv_match(type=['POS', 'SIM'])
+            if m is None:
+                break
+            if m.get_type() == 'POS':
+                pos = m
+                continue
+            sim = m
+            last_sim = prev_sim
+            prev_sim = sim
+            if pos is None or last_sim is None:
+                continue
+            if sim.TimeUS - pos.TimeUS > 20000:
+                # not the POS from this logging cycle; logging dropout?
+                continue
+            # only consider samples where the vehicle is moving
+            # quickly; staleness shows up as an error proportional
+            # to speed:
+            dt = (sim.TimeUS - last_sim.TimeUS)*1e-6
+            if dt <= 0:
+                continue
+            speed = self.get_distance(
+                Location.latlon_only(last_sim.Lat, last_sim.Lng),
+                Location.latlon_only(sim.Lat, sim.Lng)) / dt
+            if speed < 15:
+                continue
+            error = self.get_distance(
+                Location.latlon_only(pos.Lat, pos.Lng),
+                Location.latlon_only(sim.Lat, sim.Lng))
+            count += 1
+            error_sum += error
+            error_max = max(error_max, error)
+        if count < 100:
+            raise NotAchievedException(
+                "Insufficient fast-flight POS/SIM samples (%u)" % count)
+        mean_error = error_sum / count
+        self.progress("AHRS-vs-truth position error: mean=%.3fm max=%.3fm n=%u" %
+                      (mean_error, error_max, count))
+        if mean_error > max_mean_error_m:
+            raise NotAchievedException(
+                "AHRS position lags simulator truth (mean error %.3fm > %.3fm)" %
+                (mean_error, max_mean_error_m))
+
     def MicroStrainEAHRS7(self):
         '''Test MicroStrain EAHRS series 7 support'''
         self.fly_external_AHRS("MicroStrain7", 7)
@@ -3726,6 +3786,10 @@ class AutoTestPlane(vehicle_test_suite.TestSuite):
             self.wait_ekf_status_report_ok(ahrs_type)
 
         self.fly_home_land_and_disarm()
+
+    def AeronEAHRS(self):
+        '''Test AeronPlx3 EAHRS support'''
+        self.fly_external_AHRS("Aeron-PLX3", 10)
 
     def GpsSensorPreArmEAHRS(self):
         '''Test pre-arm checks related to EAHRS_SENSORS using the MicroStrain7 driver'''
@@ -6655,6 +6719,22 @@ class AutoTestPlane(vehicle_test_suite.TestSuite):
 
         self.reboot_sitl()
 
+    def AirspeedScripting(self):
+        '''test airspeed data supplied by a lua script'''
+        self.set_parameters({
+            'SCR_ENABLE': 1,
+            'ARSPD2_TYPE': 20,  # Scripting
+            'ARSPD2_USE': 0,
+        })
+        self.install_test_script_context('airspeed-scripting.lua')
+        self.reboot_sitl()
+
+        # Script sets 30m/s airspeed and 25 deg temperature
+        self.wait_message_field_values('AIRSPEED', {
+            'airspeed': 30.0,
+            'temperature': 2500,
+        }, instance=1, epsilon=0.5, minimum_duration=2, timeout=30)
+
     def RunMissionScript(self):
         '''Test run_mission.py script'''
         script = os.path.join('Tools', 'autotest', 'run_mission.py')
@@ -7726,6 +7806,8 @@ class AutoTestPlane(vehicle_test_suite.TestSuite):
 
     def DO_CHANGE_ALTITUDE(self):
         '''test DO_CHANGE_ALTITUDE mavlink command'''
+        self.install_terrain_handlers_context()
+
         takeoff_alt = 30
         self.takeoff(alt=takeoff_alt, mode='TAKEOFF')
         self.wait_altitude(takeoff_alt-1, takeoff_alt+1, minimum_duration=10, relative=True, timeout=60)
@@ -8760,6 +8842,7 @@ class AutoTestPlane(vehicle_test_suite.TestSuite):
             self.InertialLabsEAHRS,
             self.KebniSensAItionExternalINS,
             self.KebniSensAItionExternalIMU,
+            self.AeronEAHRS,
             self.GpsSensorPreArmEAHRS,
             self.EKF_STATUS_REPORT,
             self.Deadreckoning,
@@ -8815,6 +8898,7 @@ class AutoTestPlane(vehicle_test_suite.TestSuite):
             self.WindMessageSpeed,
             self.AltResetBadGPS,
             self.AirspeedCal,
+            self.AirspeedScripting,
             self.MissionJumpTags,
             Test(self.GCSFailsafe, speedup=8),
             self.SDCardWPTest,
