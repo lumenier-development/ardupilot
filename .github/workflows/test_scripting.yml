@@ -2,6 +2,7 @@ name: test scripting
 
 on:
   push:
+    branches: ['**']  # excludes tag pushes
     paths: # only run for scripting changes
       - 'libraries/AP_Scripting/tests/docs_check.py'
       - 'libraries/AP_Scripting/generator/**'
@@ -10,6 +11,7 @@ on:
       - 'Tools/scripts/run_luacheck.sh'
       - 'Tools/scripts/generate_lua_docs.sh'
       - '.github/workflows/test_scripting.yml'
+      - '.github/problem-matchers/Lua.json'
 
   pull_request:
     paths: # only run for scripting changes
@@ -20,6 +22,7 @@ on:
       - 'Tools/scripts/run_luacheck.sh'
       - 'Tools/scripts/generate_lua_docs.sh'
       - '.github/workflows/test_scripting.yml'
+      - '.github/problem-matchers/Lua.json'
 
   workflow_dispatch:
 
@@ -56,8 +59,13 @@ jobs:
         shell: bash
         run: |
           sudo apt-get update
-          sudo apt-get -y install lua-check
+          sudo apt-get -y install lua-check lua5.4
           ./Tools/scripts/run_luacheck.sh
+
+      - name: MAVLink Lua regression tests
+        run: |
+          lua5.4 libraries/AP_Scripting/tests/mavlink_layout.lua
+          lua5.4 libraries/AP_Scripting/tests/mavlink_replies.lua
 
       - name: Register lua language server problem matcher
         run: |

@@ -101,6 +101,8 @@ enum class LogEvent : uint8_t {
     NOT_SURFACED = 164,
     BOTTOMED = 165,
     NOT_BOTTOMED = 166,
+
+    EKF_MAG_OFFSETS_SAVED = 167, // compass offsets learned by the EKF were saved on disarm
 };
 
 enum class LogDataID : uint8_t {
@@ -271,14 +273,15 @@ public:
         }
         return ++MSG_id;
     }
-    void Write_MessageChunk(uint8_t id, const char *messagechunk, uint8_t chunk_seq);
+    void Write_MessageChunk(uint8_t id, const char *messagechunk, uint16_t chunk_seq);
 
     void Write_MessageF(const char *fmt, ...);
     void Write_Mode(uint8_t mode, const ModeReason reason);
 
     void Write_EntireMission();
     void Write_Command(const mavlink_command_int_t &packet,
-                       uint8_t source_system,
+                       uint32_t target_system,
+                       uint32_t source_system,
                        uint8_t source_component,
                        MAV_RESULT result,
                        bool was_command_long=false);

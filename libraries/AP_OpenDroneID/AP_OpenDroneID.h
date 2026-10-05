@@ -144,6 +144,12 @@ private:
     mavlink_open_drone_id_self_id_t pkt_self_id;
     mavlink_open_drone_id_operator_id_t pkt_operator_id;
 
+    // Payload structs only retain 8-bit targets; preserve the full IDs for sending.
+    uint32_t basic_id_target_system;
+    uint32_t system_target_system;
+    uint32_t self_id_target_system;
+    uint32_t operator_id_target_system;
+
     // last time we got a SYSTEM message
     uint32_t last_system_ms;
 
@@ -184,8 +190,8 @@ private:
     MAV_ODID_SPEED_ACC create_enum_speed_accuracy(float Accuracy) const;
     MAV_ODID_TIME_ACC create_enum_timestamp_accuracy(float Accuracy) const;
     uint16_t create_direction(uint16_t direction) const;
-    uint16_t create_speed_horizontal(uint16_t speed) const;
-    int16_t create_speed_vertical(int16_t speed) const;
+    float create_speed_horizontal(float speed) const;
+    float create_speed_vertical(float speed) const;
     float create_altitude(float altitude) const;
     float create_location_timestamp(float timestamp) const;
 

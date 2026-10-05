@@ -131,6 +131,7 @@ COMMON_VEHICLE_DEPENDENT_LIBRARIES = [
     'AP_RCMapper',
     'AP_MultiHeap',
     'AP_Follow',
+    'AP_GroundEffect',
 ]
 
 def get_legacy_defines(sketch_name, bld):
@@ -284,6 +285,7 @@ _grouped_programs = {}
 
 
 class upload_fw_blueos(Task.Task):
+    always_run = True
     def run(self):
         # this is rarely used, so we import requests here to avoid the overhead
         import requests
@@ -295,10 +297,8 @@ class upload_fw_blueos(Task.Task):
         board = bld.bldnode.name.capitalize()
         print(f"Uploading {binary_path} to BlueOS at {bld.options.upload_blueos} for board {board}")
         url = f'{bld.options.upload_blueos}/ardupilot-manager/v1.0/install_firmware_from_file?board_name={board}'
-        files = {
-          'binary': open(binary_path, 'rb')
-        }
-        response = requests.post(url, files=files, verify=False)
+        with open(binary_path, 'rb') as f:
+            response = requests.post(url, files={'binary': f}, verify=False)
         if response.status_code != 200:
             raise Errors.WafError(f"Failed to upload firmware to BlueOS: {response.status_code}: {response.text}")
         print("Upload complete")
@@ -336,7 +336,7 @@ class check_elf_symbols(Task.Task):
                      'operator new(unsigned int)',
                      'operator new(unsigned long)']
 
-        nmout = subprocess.getoutput("%s -C %s" % (self.env.get_flat('NM'), elfpath))
+        nmout = subprocess.check_output(self.env.NM + ['-C', elfpath], text=True)
         for b in blacklist:
             if nmout.find(b) != -1:
                 raise Errors.WafError("Disallowed symbol in %s: %s" % (elfpath, b))
@@ -543,16 +543,9 @@ def ap_find_benchmarks(bld, use=[]):
 
     includes = [bld.srcnode.abspath() + '/benchmarks/']
     to_remove = '-Werror=suggest-override'
-    if to_remove in bld.env.CXXFLAGS:
-        need_remove = True
-    else:
-        need_remove = False
-    if need_remove:
-        while to_remove in bld.env.CXXFLAGS:
-            bld.env.CXXFLAGS.remove(to_remove)
 
     for f in bld.path.ant_glob(incl='*.cpp'):
-        ap_program(
+        t = ap_program(
             bld,
             features=['gbenchmark'],
             includes=includes,
@@ -563,6 +556,8 @@ def ap_find_benchmarks(bld, use=[]):
             program_groups='benchmarks',
             use_legacy_defines=False,
         )
+        # only the benchmark sources include the gbenchmark header
+        t.env.CXXFLAGS = [x for x in t.env.CXXFLAGS if x != to_remove]
 
 def test_summary(bld):
     from io import BytesIO

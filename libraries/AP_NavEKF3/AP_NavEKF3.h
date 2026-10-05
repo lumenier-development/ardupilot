@@ -366,9 +366,6 @@ public:
     // Writes the default equivalent airspeed and 1-sigma uncertainty in m/s to be used in forward flight if a measured airspeed is required and not available.
     void writeDefaultAirSpeed(float airspeed, float uncertainty);
 
-    // parameter conversion
-    void convert_parameters();
-
     // returns true when the yaw angle has been aligned
     bool yawAlignmentComplete(void) const;
 
@@ -430,6 +427,7 @@ private:
     AP_Int8  _flowDelay_ms;         // effective average delay of optical flow measurements rel to IMU (msec)
     AP_Int16  _rngInnovGate;        // Percentage number of standard deviations applied to range finder innovation consistency check
     AP_Float _maxFlowRate;          // Maximum flow rate magnitude that will be accepted by the filter
+    AP_Float _flowNavGainHgt;       // height (m) up to which the optical-flow nav velocity gain is full scale
     AP_Float _rngNoise;             // Range finder noise : m
     AP_Int8 _gpsCheck;              // Bitmask controlling which preflight GPS checks are bypassed
     AP_Int8 _imuMask;               // Bitmask of IMUs to instantiate EKF3 for

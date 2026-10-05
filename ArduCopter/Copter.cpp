@@ -164,7 +164,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #endif
     SCHED_TASK(auto_disarm_check,     10,     50,  27),
 #if AP_COPTER_AHRS_AUTO_TRIM_ENABLED
-    SCHED_TASK_CLASS(RC_Channels_Copter,   &copter.g2.rc_channels,      auto_trim_run,   10,  75,  30),
+    SCHED_TASK_CLASS(AHRSTrimming,       &copter.ahrs_trimming,       auto_run,        10,  75,  30),
 #endif
 #if AP_RANGEFINDER_ENABLED
     SCHED_TASK(read_rangefinder,      20,    100,  33),
@@ -609,7 +609,9 @@ void Copter::throttle_loop()
 #endif
 
     // compensate for ground effect (if enabled)
+#if AP_GROUNDEFFECT_ENABLED
     update_ground_effect_detector();
+#endif
     update_ekf_terrain_height_stable();
 }
 

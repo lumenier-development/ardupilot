@@ -580,14 +580,6 @@ private:
     int16_t hover_roll_trim_scalar_slew;
 #endif
 
-    // ground effect detector
-    struct {
-        bool takeoff_expected;
-        bool touchdown_expected;
-        uint32_t takeoff_time_ms;
-        float takeoff_alt_m;
-    } gndeffect_state;
-
     bool standby_active;
 
     static const AP_Scheduler::Task scheduler_tasks[];
@@ -765,6 +757,20 @@ private:
     void run_custom_controller() { custom_control.update(); }
 #endif
 
+    // support for trimming AHRS using RC stick inputs, enabled via an
+    // aux function.  Also support for auto-trimming AHRS via
+    // controller outputs.
+    struct AHRSTrimming {
+#if AP_COPTER_AHRS_AUTO_TRIM_ENABLED
+        void auto_start();
+        void auto_stop();
+        void auto_run();
+        void auto_cancel();
+        bool running;
+#endif  // AP_COPTER_AHRS_AUTO_TRIM_ENABLED
+        void save_trim();
+    } ahrs_trimming;
+
     // avoidance.cpp
     void low_alt_avoidance();
 
@@ -774,7 +780,9 @@ private:
 #endif  // HAL_ADSB_ENABLED || AP_ADSB_AVOIDANCE_ENABLED
 
     // baro_ground_effect.cpp
+#if AP_GROUNDEFFECT_ENABLED
     void update_ground_effect_detector(void);
+#endif
     void update_ekf_terrain_height_stable();
 
     // commands.cpp
@@ -968,10 +976,6 @@ private:
 
     // Parameters.cpp
     void load_parameters(void) override;
-    void convert_pid_parameters(void);
-#if HAL_PROXIMITY_ENABLED
-    void convert_prx_parameters();
-#endif
 
     // precision_landing.cpp
     void init_precland();

@@ -1050,11 +1050,18 @@ AP_InertialSensor::init(uint16_t loop_rate)
             } else
 #endif
             {
+                // Note that this ignores fixedwing motors on plane.
                 AP_Motors *motors = AP::motors();
                 if (motors != nullptr) {
+#if HAL_WITH_ESC_TELEM
+                    // Both masks are aligned to servo channels, so it is safe to & them.
+                    const uint8_t num_motors = __builtin_popcount(motors->get_motor_mask() & notch.params.esc_mask());
+#else
+                    const uint8_t num_motors = __builtin_popcount(motors->get_motor_mask());
+#endif
                     // Always have at least one notch, this allows the filter to alocate and then be expanded at runtime if the number of motors is changed
                     // Never have more than INS_MAX_NOTCHES
-                    notch.num_dynamic_notches = MAX(MIN(__builtin_popcount(motors->get_motor_mask()), INS_MAX_NOTCHES), 1);
+                    notch.num_dynamic_notches = MAX(MIN(num_motors, INS_MAX_NOTCHES), 1);
                 }
             }
             // avoid harmonics unless actually configured by the user
@@ -1744,12 +1751,8 @@ AP_InertialSensor::_init_gyro()
     // cold start
     DEV_PRINTF("Init Gyro");
 
-    /*
-      we do the gyro calibration with no board rotation. This avoids
-      having to rotate readings during the calibration
-    */
-    enum Rotation saved_orientation = _board_orientation;
-    _board_orientation = ROTATION_NONE;
+    // the gyro backend leaves the board rotation off while _calibrating_gyro
+    // is set, so the samples below are already in board frame
 
     // remove existing gyro offsets
     for (uint8_t k=0; k<num_gyros; k++) {
@@ -1865,9 +1868,6 @@ AP_InertialSensor::_init_gyro()
         }
     }
 
-    // restore orientation
-    _board_orientation = saved_orientation;
-
     // record calibration complete
     _calibrating_gyro = false;
 
@@ -1937,11 +1937,9 @@ void AP_InertialSensor::update(void)
     wait_for_sample();
 
         for (uint8_t i=0; i<INS_MAX_INSTANCES; i++) {
-            // mark sensors unhealthy and let update() in each backend
-            // mark them healthy via _publish_gyro() and
-            // _publish_accel()
-            _gyro_healthy[i] = false;
-            _accel_healthy[i] = false;
+            // health flags are deliberately not cleared here: they are read
+            // from other threads, and clearing before the backends republish
+            // leaves a window in which a healthy sensor reads unhealthy
             _delta_velocity_valid[i] = false;
             _delta_angle_valid[i] = false;
         }

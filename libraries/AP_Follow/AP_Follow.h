@@ -68,7 +68,7 @@ public:
     bool enabled() const { return _enabled; }
 
     // set which target to follow
-    void set_target_sysid(uint8_t sysid) { _sysid.set(sysid); }
+    void set_target_sysid(uint32_t sysid) { _sysid.set(sysid); }
 
     // Resets the follow mode offsets to zero if they were automatically initialized. Should be called when exiting Follow mode.
     void clear_offsets_if_required();
@@ -77,11 +77,16 @@ public:
     // Target Estimation and Tracking Methods
     //==========================================================================
 
-    // Returns true if following is enabled and a recent target location update has been received.
+    // Returns true if a usable estimate of the configured target is available.  Every accessor
+    // below is gated on this, but a true return does not guarantee they will succeed, so callers
+    // must still check what each accessor returns.
     bool have_target() const;
 
     // Projects the target’s position, velocity, and heading forward using the latest updates, smoothing with input shaping if necessary 
     void update_estimates();
+
+    // convert parameters, called from the vehicle's load_parameters()
+    void convert_params();
 
     // Retrieves the estimated target position, velocity, and acceleration in the NED frame relative to the origin (units: meters and meters/second).
     bool get_target_pos_vel_accel_NED_m(Vector3p &pos_ned_m, Vector3f &vel_ned_ms, Vector3f &accel_ned_mss) const;
@@ -115,7 +120,6 @@ public:
     // Accessor Methods
     //==========================================================================
 
-    // get target sysid as a 32 bit number to allow for future expansion of MAV_SYSID
     uint32_t get_target_sysid() const { return (uint32_t)_sysid.get(); }
 
     // get position controller.  this controller is not used within this library but it is convenient to hold it here
@@ -169,6 +173,9 @@ private:
     // returns true if we should extract information from msg
     bool should_handle_message(const mavlink_message_t &msg) const;
 
+    // Returns true if the target data we hold is fresh and was supplied by the configured system.
+    bool have_target_data() const;
+
     // Checks whether the current estimate should be reset based on position and velocity errors.
     bool estimate_error_too_large() const;
     
@@ -194,7 +201,7 @@ private:
     //==========================================================================
 
     AP_Int8     _enabled;           // 1 = Follow mode is enabled; 0 = disabled
-    AP_Int16    _sysid;             // MAVLink system ID of the target (0 = no target selected)
+    AP_Int32    _sysid;             // unsigned MAVLink ID stored as a 32-bit bit pattern (0 = no target)
     AP_Float    _dist_max_m;        // Maximum allowed distance to target in meters; if exceeded, estimation is rejected
     AP_Int8     _offset_type;       // Offset frame type: 0 = NED, 1 = relative to lead vehicle heading
     AP_Vector3f _offset_m;          // Offset from lead vehicle (meters), in NED or FRD frame depending on _offset_type
@@ -236,7 +243,7 @@ private:
     Vector3f    _ofs_estimate_vel_ned_ms;       // Estimated velocity with offsets applied (NED frame)
     Vector3f    _ofs_estimate_accel_ned_mss;    // Estimated acceleration with offsets applied (NED frame)
 
-    int16_t     _sysid_used;                    // Currently active sysid used for updates
+    uint32_t    _sysid_of_data;                 // sysid that supplied the target data we currently hold
     float       _dist_to_target_m;              // Horizontal distance to target, for reporting (meters)
     float       _bearing_to_target_deg;         // Bearing to target from vehicle (degrees, 0 = North)
     bool        _offsets_were_zero;             // True if initial offset was zero before being initialized

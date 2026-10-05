@@ -22,7 +22,7 @@ extern const AP_HAL::HAL& hal;
 #define LOITER_VEL_CORRECTION_MAX_MS        2.0     // Maximum speed (in m/s) used for correcting position errors in loiter.
 #define LOITER_POS_CORRECTION_MAX_M         2.0     // Maximum horizontal position error allowed before correction (m).
 #define LOITER_ACTIVE_TIMEOUT_MS            200     // Loiter is considered active if updated within the past 200 ms.
-#define LOITER_DEFAULT_OPTIONS              1       // Enable Coordinated Turn by default.
+#define LOITER_DEFAULT_OPTIONS              0       // Coordinated Turns disabled by default.
 
 const AP_Param::GroupInfo AC_Loiter::var_info[] = {
 
@@ -262,7 +262,7 @@ void AC_Loiter::set_speed_max_NE_ms(float speed_max_ne_ms)
 // perform any required parameter conversions
 void AC_Loiter::convert_parameters()
 {
-    // PARAMETER_CONVERSION - Added: Jan-2026 for 4.7
+    // PARAMETER_CONVERSION - Added: Jan-2026 for ArduPilot-4.7
 
     // return immediately if no conversion is needed
     if (_speed_max_ne_ms.configured() || _accel_max_ne_mss.configured() || _brake_accel_max_mss.configured() || _brake_jerk_max_msss.configured()) {

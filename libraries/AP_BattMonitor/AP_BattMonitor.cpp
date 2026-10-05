@@ -1148,7 +1148,7 @@ void AP_BattMonitor::checkPoweringOff(void)
             cmd_msg.command = MAV_CMD_POWER_OFF_INITIATED;
             cmd_msg.param1 = i+1;
             GCS_MAVLINK::send_to_components(MAVLINK_MSG_ID_COMMAND_LONG, (char*)&cmd_msg, sizeof(cmd_msg));
-            GCS_SEND_TEXT(MAV_SEVERITY_WARNING, "Vehicle %d battery %d is powering off", mavlink_system.sysid, i+1);
+            GCS_SEND_TEXT(MAV_SEVERITY_WARNING, "Vehicle %u battery %d is powering off", (unsigned)mavlink_system.sysid, i+1);
 #endif
 
             // only send this once
@@ -1202,7 +1202,7 @@ MAV_BATTERY_CHARGE_STATE AP_BattMonitor::get_mavlink_charge_state(const uint8_t 
 
     case Failsafe::None:
     case Failsafe::Unhealthy:
-        if (get_mavlink_fault_bitmask(instance) != 0 || !healthy()) {
+        if (get_mavlink_fault_bitmask(instance) != 0 || !healthy(instance)) {
             return MAV_BATTERY_CHARGE_STATE_UNHEALTHY;
         }
         return MAV_BATTERY_CHARGE_STATE_OK;
